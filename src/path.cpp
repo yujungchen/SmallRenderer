@@ -98,8 +98,11 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		// Compute Throughput
 		float PhongConst = 1.0f;
 		MaterialType Mat = DetermineMat(Kd, Ks);
-		if(Mat == Glossy)
-			PhongConst = (Ns + 2.0f) * fabs(glm::dot(SampleDir, N)) / (Ns + 1.0f);
+		if(Mat == Glossy){
+			glm::vec3 InVec = glm::normalize(Pos - PrevPos);
+			glm::vec3 ReflectVec = glm::reflect(InVec, N);
+			PhongConst = (Ns + 2.0f) * fabs(glm::dot(SampleDir, ReflectVec)) / (Ns + 1.0f);
+		}
  
 		Throughput = Throughput * (Kd + PhongConst * Ks);
 		PrevPos = Pos;
