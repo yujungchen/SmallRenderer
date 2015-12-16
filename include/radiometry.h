@@ -3,17 +3,11 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "sampler.h"
-
+#include "define.h"
 
 #pragma once
 
-typedef enum{
-	Diffuse = 0, 
-	Glossy,
-	Phong,
-	Glass,
-	Misc
-}MaterialType;
+
 
 glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns);
 float ComputeG(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &N0, glm::vec3 &N1);

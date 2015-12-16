@@ -11,6 +11,7 @@
 
 // For SUTILAPI
 //#include "sutil.h"
+ #include "define.h"
 
 /* includes */
 
@@ -75,6 +76,11 @@ typedef struct _GLMmaterial
   int height;
   int mode;
   unsigned char *texelData;
+
+  // Microfacet model
+  MicroFacetType Micro;
+  DistributionType DFunction;
+  float Roughness;
 
 } GLMmaterial;
 

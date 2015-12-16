@@ -327,6 +327,8 @@ _glmReadMTL(GLMmodel* model, char* name)
   model->materials = (GLMmaterial*)malloc(sizeof(GLMmaterial) * nummaterials);
   model->nummaterials = nummaterials;
 
+
+  char  TempBuf[64];
   /* set the default material */
   for (i = 0; i < nummaterials; i++) {
     model->materials[i].name = NULL;
@@ -372,6 +374,11 @@ _glmReadMTL(GLMmodel* model, char* name)
     model->materials[i].width = 0;
     model->materials[i].height = 0;
     model->materials[i].mode = 0;
+
+    model->materials[i].Micro = MarcoSurface;
+    model->materials[i].DFunction = MarcoDistribution;
+    model->materials[i].Roughness = 0.0f;   
+
   }
   model->materials[0].name = strdup("NO_ASSIGNED_MATERIAL");
 
@@ -418,6 +425,37 @@ _glmReadMTL(GLMmodel* model, char* name)
             &model->materials[nummaterials].emissive[1],
             &model->materials[nummaterials].emissive[2]);
         break;
+
+      case 'M': {
+          fgets(buf, sizeof(buf), file);
+          sscanf(buf, "%s %s", buf, TempBuf);
+          if (strcmp(buf,"Torrance")==0) {
+            model->materials[nummaterials].Micro = Torrance;
+            printf("Use Torrance Microfacet Model\n");
+          }
+          else{
+            model->materials[nummaterials].Micro = MarcoSurface;
+          }
+
+      }
+      break;
+      case 'D': {
+          fgets(buf, sizeof(buf), file);
+          sscanf(buf, "%s %s", buf, TempBuf);
+          if (strcmp(buf,"BlinnPhong")==0) {
+            model->materials[nummaterials].DFunction = BlinnPhong;
+            printf("Use BlinnPhong Distribution Function\n");
+          }
+          else{
+            model->materials[nummaterials].DFunction = MarcoDistribution;
+          }
+      }
+      break;
+      case 'R': {
+          fscanf(file, "%f", &model->materials[nummaterials].Roughness);
+          printf("Roughness = %f\n", model->materials[nummaterials].Roughness);
+      }
+      break;
       case 'm':
         {
           char* map_name = 0;
