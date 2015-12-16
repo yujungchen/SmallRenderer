@@ -1,0 +1,8 @@
+This project is an experimetal renderer for me to use. 
+Before "make" the renderer, you need to install glm library. 
+(In Ubuntu, you can just type "sudo apt-get install libglm-dev".)
+
+Current features include
+
+* Basic thin lens
+* Basic path tracing
