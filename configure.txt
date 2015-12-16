@@ -1,0 +1,17 @@
+Model ../Model/box2/box2.obj
+SceneScale 1.0
+CameraPos 0.0 0.0 -3.7
+CameraUpVector 0.0 1.0 0.0
+CameraLookat 0.0 0.0 0.0
+Fstop 20.0
+AllinFocus 1
+FocalLength 50.0
+SensorWidth 36.0
+SensorHeight 36.0
+ResWidth 512
+SPP 128
+TestLight 1
+TestLightPos 0.0 0.7 -0.3
+TestLightEmission 2.5 2.5 2.5
+PathDepth 4
+NEE_Enable 1
