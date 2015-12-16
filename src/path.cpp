@@ -66,7 +66,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		}
 		else
 			break;
-
+		//Test
 		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
 
 		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns);
