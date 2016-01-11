@@ -67,7 +67,7 @@ Vector Reflect(Vector i, Vector n){
 	return i - 2.0f * n * Dot(n,i);
 }
 	
-glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns){
+glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, double &Pdf_W_proj){
 	glm::vec3 LocalDir = glm::vec3(0.0f);
 
 	MaterialType Mat = DetermineMat(Kd, Ks);
@@ -79,6 +79,7 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 		case Diffuse:{
 			glm::vec3 LocalP = glm::vec3(0.0f);
 			LocalP = CosHemiSampler();
+			Pdf_W_proj = 1.0 / M_PI;	// (Cos / PI) * (1 / Cos)
 			LocalBasis(N, &U, &V);
 			LocalDir = V * LocalP.x + U * LocalP.y + N * LocalP.z;
 			break;
