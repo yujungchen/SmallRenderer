@@ -1,4 +1,6 @@
 #include "path.h"
+
+#define PI       3.14159265358979323846f
 #define EPSILON 0.00001f
 
 PathIntegrator::PathIntegrator(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -50,6 +52,10 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 Throughput = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 PrevPos = m_camera->m_CameraPos;
 
+	double Pdf_A = 1.0;
+	double Pdf_W = 1.0;
+	double Prev_Pdf_W_proj = 1.0;
+
 
 	for(int Depth = 0 ; Depth < PathDepth ; Depth++){
 
@@ -69,7 +75,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 
 		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
 
-		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns);
+		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Prev_Pdf_W_proj);
 		Point P = Point(Pos.x, Pos.y, Pos.z);
 		Vector Dir = Vector(SampleDir.x, SampleDir.y, SampleDir.z);
 		RaySeg = Ray(P, Dir, EPSILON);
@@ -89,7 +95,13 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 			}
 		}
 
-		Throughput = Throughput * (Kd + Ks);
+		// Compute Throughput
+		float PhongConst = 1.0f;
+		MaterialType Mat = DetermineMat(Kd, Ks);
+		if(Mat == Glossy)
+			PhongConst = (Ns + 2.0f) * fabs(glm::dot(SampleDir, N)) / (Ns + 1.0f);
+ 
+		Throughput = Throughput * (Kd + PhongConst * Ks);
 		PrevPos = Pos;
 
 	}
