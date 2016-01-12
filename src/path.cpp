@@ -47,6 +47,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 
 	glm::vec3 PrevN = glm::vec3(0.0);
 	float Ns = 0.0f;
+	float Eta = 0.0f;
 	
 	Ray RaySeg = m_camera->CameraRay(sample_x, sample_y);
 	glm::vec3 SampleDir = glm::vec3(0.0f);
@@ -64,6 +65,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		Kd = glm::vec3(0.0);
 		Ks = glm::vec3(0.0);
 		Ns = 0.0f;
+		Eta = 0.0f;
 
 		if(m_bvh->Intersect(RaySeg, insect)){
 			float t = insect->uvt[2];
@@ -76,7 +78,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		glm::vec3 VtxThroughput = glm::vec3(1.0f, 1.0f, 1.0f);
 		double Current_Pdf_W_proj = 1.0;	
 
-		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
+		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, Eta, m_PrimList);
 		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Current_Pdf_W_proj, VtxThroughput);
 		Point P = Point(Pos.x, Pos.y, Pos.z);
 		Vector Dir = Vector(SampleDir.x, SampleDir.y, SampleDir.z);

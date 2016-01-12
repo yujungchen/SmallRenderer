@@ -334,7 +334,7 @@ bool BVHAccel::Intersect(Ray &ray, Intersection *isect) {
 }
 
 
-void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, std::vector<Primitive> m_PrimList){
+void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> m_PrimList){
 	// Store Geo
 	// Position
 	Pos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -359,12 +359,13 @@ void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm
 	
 	Vector _Kd, _Ks;
 	float _Ns;	
-	m_PrimList[isect->triId].GetKdKsNs(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Ns);
+	float _Eta;
+	m_PrimList[isect->triId].GetKdKsNsEta(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Ns, _Eta);
 
 	Kd = glm::vec3(_Kd.x, _Kd.y, _Kd.z);
 	Ks = glm::vec3(_Ks.x, _Ks.y, _Ks.z);
 	Ns = _Ns;
-
+	Eta = _Eta;
 
 
 }

@@ -40,6 +40,7 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 	glm::vec3 Kd = glm::vec3(0.0);
 	glm::vec3 Ks = glm::vec3(0.0);
 	float Ns = 0.0f;
+	float Eta = 0.0f;
 	
 	clock_t begin = clock();
 	
@@ -63,6 +64,7 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				Kd = glm::vec3(0.0);
 				Ks = glm::vec3(0.0);
 				Ns = 0.0f;
+				Eta = 0.0f;
 
 				if(m_bvh->Intersect(EyeRay, insect)){
 					float t = insect->uvt[2];
@@ -80,7 +82,7 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				if(m_bvh->IntersectP(ShadowRay))
 					continue;
 
-				m_bvh->InterpolateGeo(EyeRay, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
+				m_bvh->InterpolateGeo(EyeRay, insect, Pos, N, Kd, Ks, Ns, Eta, m_PrimList);
 				
 				Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, m_l->getlpos(), N, Kd, Ks, Ns) * ComputeG2PLight(Pos, m_l->getlpos(), N) * m_l->sampleL();
 				

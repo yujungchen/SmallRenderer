@@ -67,7 +67,7 @@ void MCRenderer::Render(){
 	printf("Rendering...\n");
 
 	// Direct Illumination
-	m_Direct->Render(m_Img, m_PathSample);
+	m_Direct->Render(m_Img, 64);
 
 	// Progress Illustration
 	unsigned int TotalTask = m_PathSample * m_Width * m_Height;
