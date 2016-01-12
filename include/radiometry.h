@@ -48,4 +48,4 @@ public:
 	MaterialType Mat;
 };
 
-glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, double &Pdf_W_proj);
+glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, double &Pdf_W_proj, glm::vec3 &Throughput);
