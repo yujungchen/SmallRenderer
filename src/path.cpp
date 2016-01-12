@@ -15,9 +15,12 @@ PathIntegrator::~PathIntegrator(){
 
 }
 
-glm::vec3 PathIntegrator::NEE(glm::vec3 lPos, glm::vec3 Pos, glm::vec3 PrevPos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, glm::vec3 lEmission){
+glm::vec3 PathIntegrator::NEE(glm::vec3 lPos, glm::vec3 Pos, glm::vec3 PrevPos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, float Eta, glm::vec3 lEmission){
 	
 	glm::vec3 NEERad = glm::vec3(0.0f);
+
+	if(Eta > 0.0)
+		return NEERad;
 
 	glm::vec3 dir2Light = lPos - Pos;
 	dir2Light = glm::normalize(dir2Light);
@@ -87,14 +90,14 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		if(m_NEE_Enable){
 			if(Depth > 0){
 				// Next event estimation
-				glm::vec3 Contribution = NEE(m_l->getlpos(), Pos, PrevPos, N, Kd, Ks, Ns, m_l->sampleL());
+				glm::vec3 Contribution = NEE(m_l->getlpos(), Pos, PrevPos, N, Kd, Ks, Ns, Eta, m_l->sampleL());
 				Rad = Rad + Throughput * Contribution;
 			}
 		}
 		else{
 			if(Depth == (PathDepth - 1)){
 				// Next event estimation
-				glm::vec3 Contribution = NEE(m_l->getlpos(), Pos, PrevPos, N, Kd, Ks, Ns, m_l->sampleL());		
+				glm::vec3 Contribution = NEE(m_l->getlpos(), Pos, PrevPos, N, Kd, Ks, Ns, Eta, m_l->sampleL());		
 				Rad = Rad + Throughput * Contribution;
 			}
 		}

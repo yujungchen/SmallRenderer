@@ -9,9 +9,9 @@ FocalLength 50.0
 SensorWidth 36.0
 SensorHeight 36.0
 ResWidth 512
-SPP 128
+SPP 1024
 TestLight 1
 TestLightPos 0.0 0.7 -0.3
 TestLightEmission 2.5 2.5 2.5
-PathDepth 4
+PathDepth 8
 NEE_Enable 1

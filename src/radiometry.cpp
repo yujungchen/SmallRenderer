@@ -118,6 +118,44 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 			break;
 		}
 		case Glass:{
+			glm::vec3 InVec = glm::normalize(Pos - PrevPos);
+			glm::vec3 ReflectVec = glm::reflect(InVec, N);
+
+			glm::vec3 N_l = glm::dot(InVec, N) < 0.0f ? N : N * (-1.0f);
+			bool into = glm::dot(N_l, N) > 0.0f;
+			float nnt = into ? 1.0f / Eta : Eta / 1.0f;
+			float ddn = glm::dot(InVec, N_l);
+			float cos2t = 1.0f - nnt * nnt * (1.0f - ddn * ddn);
+
+			if(cos2t < 0.0f){
+				LocalDir = glm::reflect(InVec, N * (-1.0f));
+			}
+			else{
+				glm::vec3 t_Dir = InVec * nnt - N * (into ? 1.0f : -1.0f) * (ddn * nnt + sqrtf(cos2t));
+				t_Dir = glm::normalize(t_Dir);
+				float a = Eta - 1.0f;
+				float b = Eta + 1.0f;
+				float R0 = a * a / (b * b);
+				float c = 1.0f - (into ? (-ddn) : glm::dot(t_Dir, N)); 
+				float Re = R0 + (1.0f - R0) * c * c * c * c * c;
+				float Tr = 1.0f - Re;
+				float P = 0.25f + 0.5f * Re;
+				float RP = Re / P;
+				float TP = Tr / (1.0f - P);
+				float RndNum = RandomNumber();
+
+				if(RndNum < P){
+					if(into)
+						LocalDir = ReflectVec;
+					else
+						LocalDir = glm::reflect(InVec, N * (-1.0f));
+				}
+				else{
+					LocalDir = t_Dir;
+				}
+
+			}
+
 
 			break;
 		}
