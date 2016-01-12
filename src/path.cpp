@@ -1,6 +1,4 @@
 #include "path.h"
-
-#define PI       3.14159265358979323846f
 #define EPSILON 0.00001f
 
 PathIntegrator::PathIntegrator(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -45,6 +43,9 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 N = glm::vec3(0.0);
 	glm::vec3 Kd = glm::vec3(0.0);
 	glm::vec3 Ks = glm::vec3(0.0);
+
+
+	glm::vec3 PrevN = glm::vec3(0.0);
 	float Ns = 0.0f;
 	
 	Ray RaySeg = m_camera->CameraRay(sample_x, sample_y);
@@ -52,10 +53,9 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 Throughput = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 PrevPos = m_camera->m_CameraPos;
 
+	// Pdf Parameter
 	double Pdf_A = 1.0;
-	double Pdf_W = 1.0;
 	double Prev_Pdf_W_proj = 1.0;
-
 
 	for(int Depth = 0 ; Depth < PathDepth ; Depth++){
 
@@ -73,9 +73,11 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		else
 			break;
 
-		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
+		glm::vec3 VtxThroughput = glm::vec3(1.0f, 1.0f, 1.0f);
+		double Current_Pdf_W_proj = 1.0;	
 
-		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Prev_Pdf_W_proj);
+		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, m_PrimList);
+		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Current_Pdf_W_proj, VtxThroughput);
 		Point P = Point(Pos.x, Pos.y, Pos.z);
 		Vector Dir = Vector(SampleDir.x, SampleDir.y, SampleDir.z);
 		RaySeg = Ray(P, Dir, EPSILON);
@@ -95,18 +97,16 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 			}
 		}
 
-		// Compute Throughput
-		float PhongConst = 1.0f;
-		MaterialType Mat = DetermineMat(Kd, Ks);
-		if(Mat == Glossy){
-			glm::vec3 InVec = glm::normalize(Pos - PrevPos);
-			glm::vec3 ReflectVec = glm::reflect(InVec, N);
-			PhongConst = (Ns + 2.0f) * fabs(glm::dot(SampleDir, ReflectVec)) / (Ns + 1.0f);
-		}
- 
-		Throughput = Throughput * (Kd + PhongConst * Ks);
-		PrevPos = Pos;
+		Throughput = Throughput * VtxThroughput;
 
+		if(Depth > 0){
+			float GTerm = ComputeG(PrevPos, Pos, PrevN, N);
+			Pdf_A = Pdf_A * (Prev_Pdf_W_proj * GTerm);
+		}
+
+		PrevPos = Pos;
+		PrevN = N;
+		Prev_Pdf_W_proj = Current_Pdf_W_proj;
 	}
 
 
