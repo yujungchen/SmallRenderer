@@ -40,25 +40,30 @@ float ComputeG2PLight(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0){
 	return GTerm;
 }
 
-MaterialType DetermineMat(glm::vec3 Kd, glm::vec3 Ks){
+MaterialType DetermineMat(glm::vec3 Kd, glm::vec3 Ks, float Eta){
 	MaterialType Mat = Misc;
 
-	if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
-	   (Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0))
-	{
-		Mat = Phong;
-	}
-	else if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
-	   		(Ks.x == 0.0 && Ks.y == 0.0 && Ks.z == 0.0)){
-		Mat = Diffuse;
-	}
-	else if((Kd.x == 0.0 && Kd.y == 0.0 && Kd.z == 0.0) && 
-	   		(Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0)){
-		Mat = Glossy;
+	if(Eta != 0.0f){
+		Mat = Glass;
 	}
 	else{
-		Mat = Misc;
-		printf("Unknown Material!\n");
+		if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
+		   (Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0))
+		{
+			Mat = Phong;
+		}
+		else if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
+		   		(Ks.x == 0.0 && Ks.y == 0.0 && Ks.z == 0.0)){
+			Mat = Diffuse;
+		}
+		else if((Kd.x == 0.0 && Kd.y == 0.0 && Kd.z == 0.0) && 
+		   		(Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0)){
+			Mat = Glossy;
+		}
+		else{
+			Mat = Misc;
+			printf("Unknown Material!\n");
+		}
 	}
 
 	return Mat;
@@ -67,10 +72,10 @@ Vector Reflect(Vector i, Vector n){
 	return i - 2.0f * n * Dot(n,i);
 }
 	
-glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, double &Pdf_W_proj, glm::vec3 &Throughput){
+glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput){
 	glm::vec3 LocalDir = glm::vec3(0.0f);
 
-	MaterialType Mat = DetermineMat(Kd, Ks);
+	MaterialType Mat = DetermineMat(Kd, Ks, Eta);
 
 	glm::vec3 U = glm::vec3(0.0f);
 	glm::vec3 V = glm::vec3(0.0f);
@@ -110,6 +115,10 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 			float GlossyConst = ((Ns + 2.0f) / (Ns + 1.0f)) * fabs(glm::dot(LocalDir, ReflectVec));				//Note: The cosine term needs to be checked.
 			
 			Throughput = Ks * GlossyConst;
+			break;
+		}
+		case Glass:{
+
 			break;
 		}
 		case Phong:{

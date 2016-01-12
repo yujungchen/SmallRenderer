@@ -79,7 +79,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		double Current_Pdf_W_proj = 1.0;	
 
 		m_bvh->InterpolateGeo(RaySeg, insect, Pos, N, Kd, Ks, Ns, Eta, m_PrimList);
-		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Current_Pdf_W_proj, VtxThroughput);
+		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Eta, Current_Pdf_W_proj, VtxThroughput);
 		Point P = Point(Pos.x, Pos.y, Pos.z);
 		Vector Dir = Vector(SampleDir.x, SampleDir.y, SampleDir.z);
 		RaySeg = Ray(P, Dir, EPSILON);
