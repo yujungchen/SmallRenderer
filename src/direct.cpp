@@ -84,7 +84,8 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 
 				m_bvh->InterpolateGeo(EyeRay, insect, Pos, N, Kd, Ks, Ns, Eta, m_PrimList);
 				
-				Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, m_l->getlpos(), N, Kd, Ks, Ns) * ComputeG2PLight(Pos, m_l->getlpos(), N) * m_l->sampleL();
+				if(Eta == 0.0f)
+					Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, m_l->getlpos(), N, Kd, Ks, Ns) * ComputeG2PLight(Pos, m_l->getlpos(), N) * m_l->sampleL();
 				
 				int CurrentPxlIdx = h * m_Width + w;
 				m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Contribution;
