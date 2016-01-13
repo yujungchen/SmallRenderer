@@ -1,7 +1,7 @@
 #include "direct.h"
 #include "time.h"
 
-#define OMP
+//#define OMP
 #define EPSILON 0.00001f
 
 DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
