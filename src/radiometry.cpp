@@ -129,6 +129,7 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 
 			if(cos2t < 0.0f){
 				LocalDir = glm::reflect(InVec, N * (-1.0f));
+				Throughput = Ks;
 			}
 			else{
 				glm::vec3 t_Dir = InVec * nnt - N * (into ? 1.0f : -1.0f) * (ddn * nnt + sqrtf(cos2t));
@@ -149,13 +150,15 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 						LocalDir = ReflectVec;
 					else
 						LocalDir = glm::reflect(InVec, N * (-1.0f));
+
+					Throughput = Ks * RP;
 				}
 				else{
 					LocalDir = t_Dir;
+					Throughput = Ks * TP;
 				}
 
 			}
-
 
 			break;
 		}
