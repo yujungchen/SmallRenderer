@@ -39,6 +39,7 @@ private:
 	float m_AspectRatio;
 	unsigned char *m_ColorImg;
 	glm::vec3 *m_Img;
+	glm::vec3 *m_DirectImg;
 	int m_PathSample;
 	float m_FocusDist;
 	int m_PathDepth;

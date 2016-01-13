@@ -3,7 +3,7 @@
 #include "radiometry.h"
 #include <time.h>
 
-#define OMP
+//#define OMP
 #define EPSILON 0.00001f
 
 MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -26,8 +26,10 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	// Allocate Frame
 	m_ColorImg = (unsigned char*)malloc(m_Width * m_Height * 3 * sizeof(unsigned char));
 	m_Img = (glm::vec3 *)malloc(m_Width * m_Height * sizeof(glm::vec3));
+	m_DirectImg = (glm::vec3 *)malloc(m_Width * m_Height * sizeof(glm::vec3));
 	for(int idx = 0 ; idx < m_Width * m_Height ; idx++){
 		m_Img[idx] = glm::vec3(0.0, 0.0, 0.0);
+		m_DirectImg[idx] = glm::vec3(0.0, 0.0, 0.0);
 		m_ColorImg[idx * 3] = 0;
 		m_ColorImg[idx * 3 + 1] = 0;
 		m_ColorImg[idx * 3 + 2] = 0;
@@ -68,7 +70,8 @@ void MCRenderer::Render(){
 	printf("Rendering...\n");
 
 	// Direct Illumination
-	m_Direct->Render(m_Img, 1);
+	int DirectSample = 64;
+	m_Direct->Render(m_DirectImg, DirectSample);
 
 	// Progress Illustration
 	unsigned int TotalTask = m_PathSample * m_Width * m_Height;
@@ -121,19 +124,21 @@ void MCRenderer::Render(){
 			unsigned char r, g, b;
 			int CurrentPxlIdx = h * m_Width + w;
 
+			glm::vec3 ClampDirectColor = m_DirectImg[CurrentPxlIdx] / (float)DirectSample;
 			glm::vec3 ClampColor = m_Img[CurrentPxlIdx] / (float)m_PathSample;
 
-			if(ClampColor.x > 1.0f)
-				ClampColor.x = 1.0;
-			if(ClampColor.y > 1.0f)
-				ClampColor.y = 1.0;
-			if(ClampColor.z > 1.0f)
-				ClampColor.z = 1.0;
+			glm::vec3 TotalColor = ClampDirectColor + ClampColor;
 
+			if(TotalColor.x > 1.0f)
+				TotalColor.x = 1.0;
+			if(TotalColor.y > 1.0f)
+				TotalColor.y = 1.0;
+			if(TotalColor.z > 1.0f)
+				TotalColor.z = 1.0;
 
-			r = (unsigned char)(int)(ClampColor.x * 255.0f);
-			g = (unsigned char)(int)(ClampColor.y * 255.0f);
-			b = (unsigned char)(int)(ClampColor.z * 255.0f);
+			r = (unsigned char)(int)(TotalColor.x * 255.0f);
+			g = (unsigned char)(int)(TotalColor.y * 255.0f);
+			b = (unsigned char)(int)(TotalColor.z * 255.0f);
 			m_ColorImg[CurrentPxlIdx * 3] = r;
 			m_ColorImg[CurrentPxlIdx * 3 + 1] = g;
 			m_ColorImg[CurrentPxlIdx * 3 + 2] = b;
