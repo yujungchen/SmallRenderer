@@ -46,12 +46,11 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 N = glm::vec3(0.0);
 	glm::vec3 Kd = glm::vec3(0.0);
 	glm::vec3 Ks = glm::vec3(0.0);
-
-
-	glm::vec3 PrevN = glm::vec3(0.0);
 	float Ns = 0.0f;
 	float Eta = 0.0f;
 	
+	glm::vec3 PrevN = glm::vec3(0.0);
+
 	Ray RaySeg = m_camera->CameraRay(sample_x, sample_y);
 	glm::vec3 SampleDir = glm::vec3(0.0f);
 	glm::vec3 Throughput = glm::vec3(1.0f, 1.0f, 1.0f);

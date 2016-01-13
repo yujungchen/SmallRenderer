@@ -3,6 +3,7 @@
 #include "radiometry.h"
 #include <time.h>
 
+#define OMP
 #define EPSILON 0.00001f
 
 MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -67,7 +68,7 @@ void MCRenderer::Render(){
 	printf("Rendering...\n");
 
 	// Direct Illumination
-	m_Direct->Render(m_Img, 64);
+	m_Direct->Render(m_Img, 1);
 
 	// Progress Illustration
 	unsigned int TotalTask = m_PathSample * m_Width * m_Height;
@@ -79,12 +80,15 @@ void MCRenderer::Render(){
 	printf("Start Rendering\n");
 
 	PathIntegrator *Path = new PathIntegrator(m_model, m_bvh, m_PrimList, m_l, m_camera, m_NEE_Enable);
-	glm::vec3 Radiance = glm::vec3(0.0f);
+
 
 	clock_t begin = clock();
 
 	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){		
 		for(int h = m_Height - 1; h >= 0 ; h--){
+#ifdef OMP
+			#pragma omp parallel for
+#endif
 			for(int w = 0; w < m_Width ; w++){
 
 				// Progress Illustration
@@ -95,7 +99,7 @@ void MCRenderer::Render(){
 				}
 				
 				// Indirect Illumination
-				Radiance = Path->ComputeRadiance(w, h, m_PathDepth);
+				glm::vec3 Radiance = Path->ComputeRadiance(w, h, m_PathDepth);
 				int CurrentPxlIdx = h * m_Width + w;
 				m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Radiance;
 			}

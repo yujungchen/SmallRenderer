@@ -1,6 +1,7 @@
 #include "direct.h"
 #include "time.h"
 
+#define OMP
 #define EPSILON 0.00001f
 
 DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -32,20 +33,13 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 	printf("Start Rendering\n");
 	// Progress Illustration
 
-	Point hitP(0.0, 0.0, 0.0);
-	Intersection *insect = new Intersection();
-	glm::vec3 Contribution = glm::vec3(0.0);
-	glm::vec3 Pos = glm::vec3(0.0);
-	glm::vec3 N = glm::vec3(0.0);
-	glm::vec3 Kd = glm::vec3(0.0);
-	glm::vec3 Ks = glm::vec3(0.0);
-	float Ns = 0.0f;
-	float Eta = 0.0f;
-	
+
 	clock_t begin = clock();
-	
-	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){		
+	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){	
 		for(int h = m_Height - 1; h >= 0 ; h--){
+#ifdef OMP
+			#pragma omp parallel for
+#endif
 			for(int w = 0; w < m_Width ; w++){
 
 				// Progress Illustration
@@ -56,15 +50,18 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				}
 				// Progress Illustration
 
+
 				Ray EyeRay = m_camera->CameraRay(w, h);
 
-				Contribution = glm::vec3(0.0);
-				Pos = glm::vec3(0.0);
-				N = glm::vec3(0.0);
-				Kd = glm::vec3(0.0);
-				Ks = glm::vec3(0.0);
-				Ns = 0.0f;
-				Eta = 0.0f;
+				Point hitP(0.0, 0.0, 0.0);
+				Intersection *insect = new Intersection();
+				glm::vec3 Contribution = glm::vec3(0.0);
+				glm::vec3 Pos = glm::vec3(0.0);
+				glm::vec3 N = glm::vec3(0.0);
+				glm::vec3 Kd = glm::vec3(0.0);
+				glm::vec3 Ks = glm::vec3(0.0);
+				float Ns = 0.0f;
+				float Eta = 0.0f;
 
 				if(m_bvh->Intersect(EyeRay, insect)){
 					float t = insect->uvt[2];
