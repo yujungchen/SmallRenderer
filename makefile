@@ -52,12 +52,12 @@ OBJ = $(patsubst %,$(OBJECT_DIR)/%,$(_OBJ))
 
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(DEPS)
 	@echo "Building object $@"
-	$(CXX) -O3 -c -msse3 -lm -o $@ $< $(CFLAGS)
+	$(CXX) -O3 -c -msse3 -fopenmp -lm -o $@ $< $(CFLAGS)
 
 all: SmallRenderer
 
 SmallRenderer: $(OBJ)
-	$(CXX) -O3 -msse3 -o $@ $^ $(CFLAGS)
+	$(CXX) -O3 -msse3 -fopenmp -o $@ $^ $(CFLAGS)
 
 .PHONY: clean
 
