@@ -121,7 +121,7 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 			glm::vec3 InVec = glm::normalize(Pos - PrevPos);
 			glm::vec3 ReflectVec = glm::reflect(InVec, N);
 
-			glm::vec3 N_l = glm::dot(InVec, N) < 0.0f ? N : N * (-1.0f);
+			glm::vec3 N_l = (glm::dot(InVec, N) < 0.0f) ? N : N * (-1.0f);
 			bool into = glm::dot(N_l, N) > 0.0f;
 			float nnt = into ? 1.0f / Eta : Eta / 1.0f;
 			float ddn = glm::dot(InVec, N_l);
