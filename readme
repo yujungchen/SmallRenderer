@@ -7,3 +7,4 @@ Features include
 
 * Thin lens (Not fully verified yet)
 * Path tracing with next event estimation
+* Supported material: Lambertian, Glossy, Glass
