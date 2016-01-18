@@ -73,7 +73,7 @@ public:
 	bool IntersectP(Ray &ray);
 	bool Intersect(Ray &ray, Intersection *isect);
     //bool IntersectGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, std::vector<Primitive> m_PrimList);
-    void InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> m_PrimList);
+    void InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
 
 public:
     

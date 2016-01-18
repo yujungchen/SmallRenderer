@@ -334,7 +334,7 @@ bool BVHAccel::Intersect(Ray &ray, Intersection *isect) {
 }
 
 
-void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> m_PrimList){
+void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList){
 	// Store Geo
 	// Position
 	Pos = glm::vec3(0.0f, 0.0f, 0.0f);
