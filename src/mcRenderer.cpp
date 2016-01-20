@@ -3,7 +3,7 @@
 #include "radiometry.h"
 #include <time.h>
 
-//#define OMP
+#define OMP
 #define EPSILON 0.00001f
 
 MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
@@ -23,6 +23,7 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	m_PathDepth = _PathDepth;
 	m_NEE_Enable = _NEE_Enable;
 
+
 	// Allocate Frame
 	m_ColorImg = (unsigned char*)malloc(m_Width * m_Height * 3 * sizeof(unsigned char));
 	m_Img = (glm::vec3 *)malloc(m_Width * m_Height * sizeof(glm::vec3));
@@ -36,7 +37,8 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	}
 	// Allocate Frame
 
-	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _camera, _Width, _Height, _PathSample);
+	m_DirectSampleNum = 64;
+	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _camera, _Width, _Height, m_DirectSampleNum);
 }
 
 MCRenderer::~MCRenderer(){
@@ -70,8 +72,8 @@ void MCRenderer::Render(){
 	printf("Rendering...\n");
 
 	// Direct Illumination
-	int DirectSample = 64;
-	m_Direct->Render(m_DirectImg, DirectSample);
+	int m_DirectSampleNum = 64;
+	m_Direct->Render(m_DirectImg, m_DirectSampleNum);
 
 	// Progress Illustration
 	unsigned int TotalTask = m_PathSample * m_Width * m_Height;
@@ -124,7 +126,7 @@ void MCRenderer::Render(){
 			unsigned char r, g, b;
 			int CurrentPxlIdx = h * m_Width + w;
 
-			glm::vec3 ClampDirectColor = m_DirectImg[CurrentPxlIdx] / (float)DirectSample;
+			glm::vec3 ClampDirectColor = m_DirectImg[CurrentPxlIdx] / (float)m_DirectSampleNum;
 			glm::vec3 ClampColor = m_Img[CurrentPxlIdx] / (float)m_PathSample;
 
 			glm::vec3 TotalColor = ClampDirectColor + ClampColor;

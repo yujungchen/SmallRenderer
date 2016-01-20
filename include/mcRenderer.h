@@ -36,6 +36,7 @@ private:
 
 	int m_Width;
 	int m_Height;
+	int m_DirectSampleNum;
 	float m_AspectRatio;
 	unsigned char *m_ColorImg;
 	glm::vec3 *m_Img;
