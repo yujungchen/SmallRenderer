@@ -151,11 +151,11 @@ glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::v
 					else
 						LocalDir = glm::reflect(InVec, N * (-1.0f));
 
-					Throughput = Ks * RP;
+					Throughput = Ks;
 				}
 				else{
 					LocalDir = t_Dir;
-					Throughput = Ks * TP;
+					Throughput = Ks;
 				}
 
 			}
