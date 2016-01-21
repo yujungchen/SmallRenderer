@@ -88,6 +88,7 @@ typedef struct {
   unsigned int matId;		// material ID
 } GLMtriangle;
 
+
 /* GLMgroup: Structure that defines a group in a model.
 */
 typedef struct _GLMgroup {
@@ -133,6 +134,11 @@ typedef struct {
   float position[3];      /* position of the model */
 
   bool usePerVertexColors;             /* Are there per vertex colors? */
+
+  /* Define area light */
+  bool hasLight;
+  unsigned int numLightTri;
+  GLMtriangle *m_areaLight; 
 
 } GLMmodel;
 

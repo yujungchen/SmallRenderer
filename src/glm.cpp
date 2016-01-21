@@ -21,6 +21,7 @@
 
 /* defines */
 #define T(x) model->triangles[(x)]
+#define LT(x) model->m_areaLight[(x)]
 
 static const char* default_group_name = "No Group";
 static const char* default_material_name = "No Material";
@@ -580,7 +581,7 @@ _glmFirstPass(GLMmodel* model, FILE* file)
   //printf("%s\n", current_group_base_name);
 
   numvertices = numnormals = numtexcoords = numtriangles = 0;
-
+  int NumLightTri = 0;
   while(fscanf(file, "%s", buf) != EOF) {
     switch(buf[0]) {
       case '#':     /* comment */
@@ -655,11 +656,22 @@ _glmFirstPass(GLMmodel* model, FILE* file)
         if (current_group_base_name) free(current_group_base_name);
         current_group_base_name = strdup(buf);
         printf("%s\n", current_group_base_name);
+        
+        if(strcmp(current_group_base_name, "light") == 0){
+          printf("%s\n", current_group_base_name);
+          model->hasLight = true;
+        }
+
         sprintf(buf, "%s_MAT_%s",
             current_group_base_name, current_material_name);
         group = _glmAddGroup(model, buf);
         break;
       case 'f':       /* face */
+        if(strcmp(current_group_base_name, "light") == 0){
+          model->numLightTri++;
+          printf("%d Light Tris\n", model->numLightTri);
+        }
+
         v = n = t = 0;
         fscanf(file, "%s", buf);
         /* can be one of %d, %d//%d, %d/%d, %d/%d/%d %d//%d */
@@ -777,6 +789,7 @@ _glmSecondPass(GLMmodel* model, FILE* file)
      allocated arrays */
   numvertices = numnormals = numtexcoords = 1;
   numtriangles = 0;
+  unsigned int numLighttriangles = 0;
   material = 0;
   grpname = strdup(default_group_name);
   mtlname = strdup(default_material_name);
@@ -870,9 +883,17 @@ _glmSecondPass(GLMmodel* model, FILE* file)
           T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
           T(numtriangles).nindices[2] = n;
           T(numtriangles).tindices[2] = 0;
-		  T(numtriangles).matId = material;
+		      T(numtriangles).matId = material;
+
+          if(strcmp(grpname, "light") == 0){
+            LT(numLighttriangles) = T(numtriangles);
+            numLighttriangles++;
+          }
+
           group->triangles[group->numtriangles++] = numtriangles;
           numtriangles++;
+
+
           while(fscanf(file, "%d//%d", &v, &n) > 0) {
             T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
             T(numtriangles).nindices[0] = T(numtriangles-1).nindices[0];
@@ -883,7 +904,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
             T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
             T(numtriangles).nindices[2] = n;
             T(numtriangles).tindices[2] = 0;
-			T(numtriangles).matId = material;
+			      T(numtriangles).matId = material;
+            if(strcmp(grpname, "light") == 0){
+              LT(numLighttriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
             group->triangles[group->numtriangles++] = numtriangles;
             numtriangles++;
           }
@@ -900,7 +925,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
           T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
           T(numtriangles).nindices[2] = n;
           T(numtriangles).tindices[2] = t;
-		  T(numtriangles).matId = material;
+		      T(numtriangles).matId = material;
+          if(strcmp(grpname, "light") == 0){
+              LT(numLighttriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
           group->triangles[group->numtriangles++] = numtriangles;
           numtriangles++;
           while(fscanf(file, "%d/%d/%d", &v, &t, &n) > 0) {
@@ -914,6 +943,10 @@ _glmSecondPass(GLMmodel* model, FILE* file)
             T(numtriangles).nindices[2] = n;
             T(numtriangles).tindices[2] = t;
 			T(numtriangles).matId = material;
+            if(strcmp(grpname, "light") == 0){
+              LT(numLighttriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
             group->triangles[group->numtriangles++] = numtriangles;
             numtriangles++;
           }
@@ -930,7 +963,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
           T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
           T(numtriangles).nindices[2] = 0;
           T(numtriangles).tindices[2] = t;
-		  T(numtriangles).matId = material;
+		      T(numtriangles).matId = material;
+          if(strcmp(grpname, "light") == 0){
+              LT(numtriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
           group->triangles[group->numtriangles++] = numtriangles;
           numtriangles++;
           while(fscanf(file, "%d/%d", &v, &t) > 0) {
@@ -943,7 +980,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
             T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
             T(numtriangles).nindices[2] = 0;
             T(numtriangles).tindices[2] = t;
-			T(numtriangles).matId = material;
+			      T(numtriangles).matId = material;
+            if(strcmp(grpname, "light") == 0){
+              LT(numtriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
             group->triangles[group->numtriangles++] = numtriangles;
             numtriangles++;
           }
@@ -961,7 +1002,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
           T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
           T(numtriangles).nindices[2] = 0;
           T(numtriangles).tindices[2] = 0;
-		  T(numtriangles).matId = material;
+		      T(numtriangles).matId = material;
+          if(strcmp(grpname, "light") == 0){
+              LT(numLighttriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
           group->triangles[group->numtriangles++] = numtriangles;
           numtriangles++;
           while(fscanf(file, "%d", &v) > 0) {
@@ -974,7 +1019,11 @@ _glmSecondPass(GLMmodel* model, FILE* file)
             T(numtriangles).vindices[2] = (v >= 0) ? v : (numvertices + v);
             T(numtriangles).nindices[2] = 0;
             T(numtriangles).tindices[2] = 0;
-			T(numtriangles).matId = material;
+			      T(numtriangles).matId = material;
+            if(strcmp(grpname, "light") == 0){
+              LT(numLighttriangles) = T(numtriangles);
+              numLighttriangles++;
+            }
             group->triangles[group->numtriangles++] = numtriangles;
             numtriangles++;
           }
@@ -1646,6 +1695,10 @@ glmReadOBJ(const char* filename)
   model->position[1]   = 0.0;
   model->position[2]   = 0.0;
   model->usePerVertexColors = 0;
+  
+  model->hasLight = false;
+  model->numLightTri = 0;
+  model->m_areaLight = NULL;
   /* make a first pass through the file to get a count of the number
      of vertices, normals, texcoords & triangles */
   if (_glmFirstPass(model, file)) {
@@ -1662,6 +1715,10 @@ glmReadOBJ(const char* filename)
       3 * (model->numvertices + 1));
   model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
       model->numtriangles);
+
+  model->m_areaLight = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
+      model->numLightTri);
+
   if (model->numnormals) {
     model->normals = (float*)malloc(sizeof(float) *
         3 * (model->numnormals + 1));
