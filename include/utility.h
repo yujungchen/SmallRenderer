@@ -580,6 +580,13 @@ typedef struct _PixelPos {
 } PixelPos;
 
 
+inline glm::vec3 BarycentricInterpolation(glm::vec3 P0, glm::vec3 P1, glm::vec3 P2, glm::vec3 Coef){
+    glm::vec3 Result = glm::vec3(0.0, 0.0, 0.0);
+    Result = Coef.x * P0 + Coef.y * P1 + Coef.z * P2;
+    return Result;
+}
+
+
 inline void LocalBasis(glm::vec3 Normal, glm::vec3 *BiNormal, glm::vec3 *BiTangent){
     Normal = glm::normalize(Normal);
 
@@ -629,5 +636,14 @@ inline void TBN(Vector Normal, Vector* BiNormal, Vector* BiTangent){
     *BiNormal = TempBiNormal;
     TempBiTangent = Cross(TempBiNormal, Normal);
     *BiTangent = TempBiTangent;
+}
+
+inline bool isLight(glm::vec3 &Emission){
+    bool isL = false;
+
+    if(Emission.x > 0.0f || Emission.y > 0.0f || Emission.z > 0.0f)
+        isL = true;
+
+    return isL;
 }
 

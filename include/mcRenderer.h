@@ -14,7 +14,7 @@ class MCRenderer{
   
 public:
 	MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-			   TestLight *_l, Camera *_camera, 
+			   PointLight *_l, AreaLight *_al, Camera *_camera, 
 			   int _Width, int _Height, float _AspectRatio, int _PathSample, float _FocusDist,
 			   int _PathDepth, bool _NEE_Enable);
 	~MCRenderer();
@@ -23,14 +23,12 @@ public:
 
 private:
 
-	glm::vec3 PhongLighting(glm::vec3 Pos, glm::vec3 Normal, glm::vec3 Kd, glm::vec3 Ks, glm::vec3 L_Pos, glm::vec3 L_Emission);
-	glm::vec3 Casting(Vector vec);
-
 	GLMmodel *m_model;
 	BVHAccel *m_bvh;
 	std::vector<Primitive> m_PrimList;
 
-	TestLight *m_l;
+	PointLight *m_l;
+	AreaLight *m_al;
 	Camera *m_camera;
 	DirectIllumination *m_Direct;
 

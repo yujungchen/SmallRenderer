@@ -36,7 +36,7 @@ public:
 	
 	void GetKdKsNs(float u, float v, Vector &Kd, Vector &Ks, float &Ns);
     void GetKdKsNsEta(float u, float v, Vector &Kd, Vector &Ks, float &Ns, float &Eta);
-	
+	void GetKdKsNsEtaEmission(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta);
 	
     // Primitive Public Data
     uint32_t primitiveId;

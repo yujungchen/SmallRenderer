@@ -366,6 +366,40 @@ void BVHAccel::InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm
 	Ks = glm::vec3(_Ks.x, _Ks.y, _Ks.z);
 	Ns = _Ns;
 	Eta = _Eta;
+}
+
+void BVHAccel::InterpolateGeoV2(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList){
+	// Store Geo
+	Vector _Kd, _Ks, _Emission;
+	float _Ns;	
+	float _Eta;
+	m_PrimList[isect->triId].GetKdKsNsEtaEmission(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Emission, _Ns, _Eta);
+
+	// Position
+	Pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	float t = isect->uvt[2];
+	Point hitP = ray.o + t * ray.d;
+	Pos = glm::vec3(hitP.x, hitP.y, hitP.z); 
+
+	// Normal
+	N = glm::vec3(0.0f, 0.0f, 0.0f);
+	Normal _N;
+	Normal n0(model->normals[model->triangles[isect->triId].nindices[0] * 3 + 0], model->normals[model->triangles[isect->triId].nindices[0] * 3 + 1], model->normals[model->triangles[isect->triId].nindices[0] * 3 + 2]);
+	Normal n1(model->normals[model->triangles[isect->triId].nindices[1] * 3 + 0], model->normals[model->triangles[isect->triId].nindices[1] * 3 + 1], model->normals[model->triangles[isect->triId].nindices[1] * 3 + 2]);
+	Normal n2(model->normals[model->triangles[isect->triId].nindices[2] * 3 + 0], model->normals[model->triangles[isect->triId].nindices[2] * 3 + 1], model->normals[model->triangles[isect->triId].nindices[2] * 3 + 2]);
+	_N = BaryInterpolationN(n0, n1, n2, isect->uvt[0], isect->uvt[1]);
+	N = glm::vec3(_N.x, _N.y, _N.z);
 
 
+	// Material and Albedo
+	Kd = glm::vec3(0.0f, 0.0f, 0.0f);
+	Ks = glm::vec3(0.0f, 0.0f, 0.0f);
+	Ns = 0.0f;
+	
+	Kd = glm::vec3(_Kd.x, _Kd.y, _Kd.z);
+	Ks = glm::vec3(_Ks.x, _Ks.y, _Ks.z);
+	Emission = glm::vec3(_Emission.x, _Emission.y, _Emission.z);
+	Ns = _Ns;
+
+	Eta = _Eta;
 }

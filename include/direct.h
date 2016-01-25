@@ -13,7 +13,7 @@ class DirectIllumination{
 
 public:
 	DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-					   TestLight *_l, Camera *_camera, 
+					   PointLight *_l, AreaLight *_al, Camera *_camera, 
 					   int _Width, int _Height, int _PathSample);
 	~DirectIllumination();
 	void Render(glm::vec3 *m_Img, int SampleNumber);
@@ -25,13 +25,14 @@ private:
 	BVHAccel *m_bvh;
 	std::vector<Primitive> m_PrimList;
 
-	TestLight *m_l;
+	PointLight *m_l;
+	AreaLight *m_al;
 	Camera *m_camera;
 
 	int m_Width;
 	int m_Height;
 	int m_PathSample;
 
-
+	bool m_useArealight;
 
 };

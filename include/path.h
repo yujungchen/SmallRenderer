@@ -14,11 +14,11 @@ class PathIntegrator{
   
 public:
 	PathIntegrator(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-				   TestLight *_l, Camera *_camera, bool _NEE_Enable);
+				   PointLight *_l, AreaLight *_al, Camera *_camera, bool _NEE_Enable, bool _UseAreaLight);
 	~PathIntegrator();
 
 	glm::vec3 ComputeRadiance(int sample_x, int sample_y, int PathDepth);
-	glm::vec3 NEE(glm::vec3 lPos, glm::vec3 Pos, glm::vec3 PrevPos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, float Eta, glm::vec3 lEmission);
+	glm::vec3 NEE(glm::vec3 &Pos, glm::vec3 &PrevPos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta);
 
 private:
 
@@ -26,9 +26,11 @@ private:
 	BVHAccel *m_bvh;
 	std::vector<Primitive> m_PrimList;
 
-	TestLight *m_l;
+	PointLight *m_l;
+	AreaLight *m_al;
 	Camera *m_camera;
 
 	bool m_NEE_Enable;
+	bool m_UseAreaLight;
 
 };

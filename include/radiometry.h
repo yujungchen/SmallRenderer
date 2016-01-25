@@ -15,10 +15,10 @@ typedef enum{
 	Misc
 }MaterialType;
 
-glm::vec3 EvalPhongBRDF(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 Pos2, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns);
-float ComputeG(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0, glm::vec3 N1);
+glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns);
+float ComputeG(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &N0, glm::vec3 &N1);
 float ComputeG2PLight(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0);
-MaterialType DetermineMat(glm::vec3 Kd, glm::vec3 Ks, float Eta);
+MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta);
 
 class PathVtx{
 
@@ -51,4 +51,4 @@ public:
 	MaterialType Mat;
 };
 
-glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput);
+glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput);

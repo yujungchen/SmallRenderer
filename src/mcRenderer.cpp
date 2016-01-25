@@ -7,12 +7,13 @@
 #define EPSILON 0.00001f
 
 MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-					   TestLight *_l, Camera *_camera,
+					   PointLight *_l, AreaLight *_al, Camera *_camera,
 					   int _Width, int _Height, float _AspectRatio, int _PathSample, float _FocusDist,
 					   int _PathDepth, bool _NEE_Enable){
 	m_model = _model;
 	m_bvh = _bvh;
 	m_l = _l;
+	m_al = _al;
 	m_camera = _camera;
 	m_Width = _Width;
 	m_Height = _Height;
@@ -36,43 +37,23 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 		m_ColorImg[idx * 3 + 2] = 0;
 	}
 	// Allocate Frame
-
-	m_DirectSampleNum = 64;
-	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _camera, _Width, _Height, m_DirectSampleNum);
+	if(m_model->hasLight)
+		m_DirectSampleNum = 128;
+	else
+		m_DirectSampleNum = 64;
+	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum);
 }
 
 MCRenderer::~MCRenderer(){
 
 }
 
-glm::vec3 MCRenderer::Casting(Vector vec){
-	return glm::vec3(vec.x, vec.y, vec.z);
-}
-
-glm::vec3 MCRenderer::PhongLighting(glm::vec3 Pos, glm::vec3 Normal, glm::vec3 Kd, glm::vec3 Ks, glm::vec3 L_Pos, glm::vec3 L_Emission){
-	glm::vec3 Contribution = glm::vec3(0.0);
-	glm::vec3 P2L = L_Pos - Pos;
-	float D = glm::length(P2L);
-
-
-	P2L = glm::normalize(P2L);
-	float CosTerm = glm::dot(P2L, Normal);
-	float Intensity = std::min(1.0f, std::max(0.0f, CosTerm) / (D * D));
-
-	Contribution = Kd * Intensity * L_Emission;
-	Contribution.x = std::min(1.0f, Contribution.x);
-	Contribution.y = std::min(1.0f, Contribution.y);
-	Contribution.z = std::min(1.0f, Contribution.z);
-
-	return Contribution;
-}
 
 
 void MCRenderer::Render(){
 	printf("Rendering...\n");
 
 	// Direct Illumination
-	int m_DirectSampleNum = 64;
 	m_Direct->Render(m_DirectImg, m_DirectSampleNum);
 
 	// Progress Illustration
@@ -84,9 +65,8 @@ void MCRenderer::Render(){
 	printf("Indirect Illumination\n");
 	printf("Start Rendering\n");
 
-	PathIntegrator *Path = new PathIntegrator(m_model, m_bvh, m_PrimList, m_l, m_camera, m_NEE_Enable);
 
-
+	PathIntegrator *Path = new PathIntegrator(m_model, m_bvh, m_PrimList, m_l, m_al, m_camera, m_NEE_Enable, m_model->hasLight);
 	clock_t begin = clock();
 
 	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){		

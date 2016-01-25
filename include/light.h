@@ -5,11 +5,11 @@
 
 #pragma once
 
-class TestLight{
+class PointLight{
 
 public:
-	TestLight(glm::vec3 _lpos, glm::vec3 _lemission);
-	~TestLight();
+	PointLight(glm::vec3 _lpos, glm::vec3 _lemission);
+	~PointLight();
 	glm::vec3 sampleL();
 	glm::vec3 getlpos();
 private:
@@ -29,6 +29,7 @@ class AreaLight{
 public:
 	AreaLight(GLMmodel *_model);
 	~AreaLight();
+	glm::vec3 sampleL(glm::vec3 &Pos, glm::vec3 &N);
 	
 private:
 	int m_Num_lTri;

@@ -655,10 +655,10 @@ _glmFirstPass(GLMmodel* model, FILE* file)
         sscanf(buf, "%s", buf);
         if (current_group_base_name) free(current_group_base_name);
         current_group_base_name = strdup(buf);
-        printf("%s\n", current_group_base_name);
+        //printf("%s\n", current_group_base_name);
         
         if(strcmp(current_group_base_name, "light") == 0){
-          printf("%s\n", current_group_base_name);
+          //printf("%s\n", current_group_base_name);
           model->hasLight = true;
         }
 
@@ -669,7 +669,7 @@ _glmFirstPass(GLMmodel* model, FILE* file)
       case 'f':       /* face */
         if(strcmp(current_group_base_name, "light") == 0){
           model->numLightTri++;
-          printf("%d Light Tris\n", model->numLightTri);
+          //printf("%d Light Tris\n", model->numLightTri);
         }
 
         v = n = t = 0;

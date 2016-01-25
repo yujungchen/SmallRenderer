@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "sampler.h"
 
 double RandomNumber(){
@@ -28,4 +29,20 @@ glm::vec3 CosHemiSampler(){
 	float y = r * sin(theta);
  
 	return glm::vec3(x, y, sqrt(glm::max(0.0f, 1 - u1)));
+}
+
+glm::vec3 TriBaryUVSampler(){
+	float u1 = RandomNumber();
+	float u2 = RandomNumber();
+	float u1sqrt = sqrt(u1);
+
+	float U = 1.0f - u1sqrt;
+	float V = (1.0f - u2) * u1sqrt;
+	float T = u2 * u1sqrt;
+
+	if(U + V + T - 1.0f > 0.01f){
+		printf("Bad bary sample %f %f %f = %.10f\n", U, V, T, U + V + T);
+	}
+
+	return glm::vec3(U, V, T);
 }
