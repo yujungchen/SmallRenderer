@@ -1,17 +1,19 @@
 #include "light.h"
+#include "sampler.h"
+#include "utility.h"
 
-TestLight::TestLight(glm::vec3 _lpos, glm::vec3 _lemission){
+PointLight::PointLight(glm::vec3 _lpos, glm::vec3 _lemission){
 	m_lpos = _lpos;
 	m_lemission = _lemission;
 }
 
-TestLight::~TestLight(){}
+PointLight::~PointLight(){}
 
-glm::vec3 TestLight::sampleL(){
+glm::vec3 PointLight::sampleL(){
 	return m_lemission;
 }
 
-glm::vec3 TestLight::getlpos(){
+glm::vec3 PointLight::getlpos(){
 	return m_lpos;
 }
 
@@ -31,7 +33,7 @@ AreaLight::AreaLight(GLMmodel *model){
 		//printf("%f ", m_Tri_l[Idx].Kd.x);	printf("%f ", m_Tri_l[Idx].Kd.y);	printf("%f\n", m_Tri_l[Idx].Kd.z);	
 		//printf("%f ", m_Tri_l[Idx].Emission.x);	printf("%f ", m_Tri_l[Idx].Emission.y);	printf("%f\n", m_Tri_l[Idx].Emission.z);
 		
-		printf("Area light %d\n", Idx);
+		//printf("Area light %d\n", Idx);
 		for(int vIdx = 0 ; vIdx < 3 ; vIdx++){
 			m_Tri_l[Idx].V[vIdx].x = model->vertices[model->m_areaLight[Idx].vindices[vIdx] * 3 + 0];
 			m_Tri_l[Idx].V[vIdx].y = model->vertices[model->m_areaLight[Idx].vindices[vIdx] * 3 + 1];
@@ -40,7 +42,6 @@ AreaLight::AreaLight(GLMmodel *model){
 			m_Tri_l[Idx].N[vIdx].x = model->normals[model->m_areaLight[Idx].nindices[vIdx] * 3 + 0];
 			m_Tri_l[Idx].N[vIdx].y = model->normals[model->m_areaLight[Idx].nindices[vIdx] * 3 + 1];
 			m_Tri_l[Idx].N[vIdx].z = model->normals[model->m_areaLight[Idx].nindices[vIdx] * 3 + 2];
-
 			//printf("[V%d] %f ", vIdx, m_Tri_l[Idx].V[vIdx].x);	printf("%f ", m_Tri_l[Idx].V[vIdx].y);	printf("%f\n", m_Tri_l[Idx].V[vIdx].z);
 			//printf("[N%d] %f ", vIdx, m_Tri_l[Idx].N[vIdx].x);	printf("%f ", m_Tri_l[Idx].N[vIdx].y);	printf("%f\n", m_Tri_l[Idx].N[vIdx].z);
 		}
@@ -50,3 +51,34 @@ AreaLight::AreaLight(GLMmodel *model){
 }
 
 AreaLight::~AreaLight(){}
+
+glm::vec3 AreaLight::sampleL(glm::vec3 &Pos, glm::vec3 &N){
+	glm::vec3 lemission = glm::vec3(0.0, 0.0, 0.0);
+	int TriNum = rand() % m_Num_lTri;
+
+	// Sample the triangle
+	if(TriNum >= m_Num_lTri){
+		printf("Sample the wrong index.\n");
+		exit(0);
+	}
+
+	LightTri SampleTri = m_Tri_l[TriNum];
+
+	// Barycentric sample coefficient
+	glm::vec3 BaryCoef = TriBaryUVSampler();
+	Pos = BarycentricInterpolation(SampleTri.V[0], SampleTri.V[1], SampleTri.V[2], BaryCoef);
+	// Trick : Assuming the Normals are the same of a primitive.
+	//N = BarycentricInterpolation(SampleTri.N[0], SampleTri.N[1], SampleTri.N[2], BaryCoef);
+	N = SampleTri.N[0];
+
+/*
+	glm::vec3 LocalP = glm::vec3(0.0f);
+	glm::vec3 U = glm::vec3(0.0f);
+	glm::vec3 V = glm::vec3(0.0f);
+	LocalP = CosHemiSampler();
+	LocalBasis(TempN, &U, &V);
+	N = V * LocalP.x + U * LocalP.y + TempN * LocalP.z;
+*/
+	lemission = SampleTri.Kd * SampleTri.Emission;
+	return lemission;
+}

@@ -2,19 +2,23 @@
 #include "time.h"
 
 //#define OMP
-#define EPSILON 0.00001f
+#define EPSILON 0.0001f
 
 DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-					   TestLight *_l, Camera *_camera, 
+					   PointLight *_l, AreaLight *_al, Camera *_camera, 
 					   int _Width, int _Height, int _PathSample){
 	m_model = _model;
 	m_bvh = _bvh;
 	m_l = _l;
+	m_al = _al;
 	m_camera = _camera;
 	m_PrimList = _PrimList;
 	m_Width = _Width;
 	m_Height = _Height;
 	m_PathSample = _PathSample;
+	m_useArealight = false;
+	if(m_model->hasLight)
+		m_useArealight = true;
 }
 
 DirectIllumination::~DirectIllumination(){
@@ -33,6 +37,7 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 	printf("Start Rendering\n");
 	// Progress Illustration
 
+	Intersection *insect = new Intersection();
 
 	clock_t begin = clock();
 	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){	
@@ -49,17 +54,18 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 					Progress = Progress + 1.0f;
 				}
 				// Progress Illustration
-
+				int CurrentPxlIdx = h * m_Width + w;
 
 				Ray EyeRay = m_camera->CameraRay(w, h);
 
 				Point hitP(0.0, 0.0, 0.0);
-				Intersection *insect = new Intersection();
+				
 				glm::vec3 Contribution = glm::vec3(0.0);
 				glm::vec3 Pos = glm::vec3(0.0);
 				glm::vec3 N = glm::vec3(0.0);
 				glm::vec3 Kd = glm::vec3(0.0);
 				glm::vec3 Ks = glm::vec3(0.0);
+				glm::vec3 Emission = glm::vec3(0.0);
 				float Ns = 0.0f;
 				float Eta = 0.0f;
 
@@ -71,22 +77,47 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				else
 					continue;
 
+				m_bvh->InterpolateGeoV2(EyeRay, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+
+				// If hit light source, directly return color
+				if(isLight(Emission)){
+					Contribution = Kd;
+					m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Contribution;
+					continue;
+				}
+
 				// Direct Illumination
-				glm::vec3 dir2Light = m_l->getlpos() - Pos;
+				// Sample light source
+				glm::vec3 l_Pos = glm::vec3(0.0f);
+				glm::vec3 l_N = glm::vec3(0.0f);
+				glm::vec3 l_emission = glm::vec3(0.0f);
+				if(m_useArealight){
+					l_emission = m_al->sampleL(l_Pos, l_N);
+				}
+				else{
+					l_Pos = m_l->getlpos();
+					l_N = glm::normalize(Pos - l_Pos);
+					l_emission = m_l->sampleL();
+				}
+
+				// Cast shadow ray
+				glm::vec3 dir2Light = l_Pos - Pos;
 				dir2Light = glm::normalize(dir2Light);
-				Vector shaod_dir = Vector(dir2Light.x, dir2Light.y, dir2Light.z);
-				Ray ShadowRay(hitP, shaod_dir, EPSILON, glm::length(m_l->getlpos() - Pos));
-				if(m_bvh->IntersectP(ShadowRay))
+
+				// Backface of the light source
+				if(glm::dot(l_N, dir2Light) >= 0.0f)
 					continue;
 
-				m_bvh->InterpolateGeo(EyeRay, insect, Pos, N, Kd, Ks, Ns, Eta, m_PrimList);
+				Vector shaod_dir = Vector(dir2Light.x, dir2Light.y, dir2Light.z);
+				Ray ShadowRay(hitP, shaod_dir, EPSILON, glm::length(l_Pos - Pos) - 0.0001f);
+				if(m_bvh->IntersectP(ShadowRay))
+					continue;
 				
-				if(Eta == 0.0f)
-					Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, m_l->getlpos(), N, Kd, Ks, Ns) * ComputeG2PLight(Pos, m_l->getlpos(), N) * m_l->sampleL();
+				if(Eta == 0.0f){
+					Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+				}
 				
-				int CurrentPxlIdx = h * m_Width + w;
 				m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Contribution;
-
 			}
 		}
 	}

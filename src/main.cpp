@@ -127,13 +127,21 @@ int main(int argc, char **argv){
 	printf("Finish building AS.\n\n");
 	// Build BVH
 
-	TestLight *l = new TestLight(m_TestLightPos, m_TestLightEmission);
+	// Configure Light Source
+	PointLight *l = new PointLight(m_TestLightPos, m_TestLightEmission);
+	AreaLight *al;
+	if(model->hasLight){
+		//printf("Apply area light source\n");
+		al = new AreaLight(model);
+	}
+
+	// Configure Camera
 	Camera *cam = new Camera(m_CameraPos, m_CameraLookat, m_CameraUp,
 							 m_Fstop, m_FocalLength, m_Aperture, m_SensorWidth, m_SensorHeight,
 							 m_AspectRatio, m_ResWidth, m_ResHeight, m_FovV, m_FovH, m_AllinFocus);
 
 
-	MCRenderer *Renderer = new MCRenderer(model, bvh, triList, l, cam, m_ResWidth, m_ResHeight, m_AspectRatio, m_SPP, m_FocusDist, m_PathDepth, m_NEE_Enable);
+	MCRenderer *Renderer = new MCRenderer(model, bvh, triList, l, al, cam, m_ResWidth, m_ResHeight, m_AspectRatio, m_SPP, m_FocusDist, m_PathDepth, m_NEE_Enable);
 	
 	Renderer->Render();
 
