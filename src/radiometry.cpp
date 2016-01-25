@@ -2,7 +2,7 @@
 #include "utility.h"
 
 
-glm::vec3 EvalPhongBRDF(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 Pos2, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns){
+glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns){
 	glm::vec3 BRDF = glm::vec3(0.0f);
 	
 	float GlossyFactor = 0.0f;
@@ -17,7 +17,7 @@ glm::vec3 EvalPhongBRDF(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 Pos2, glm::vec
 	return BRDF;
 }
 
-float ComputeG(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0, glm::vec3 N1){
+float ComputeG(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &N0, glm::vec3 &N1){
 	float GTerm = 0.0f;
 	glm::vec3 vConnect = glm::normalize(Pos0 - Pos1);
 	float Cos0 = glm::dot(N0, vConnect);
@@ -40,7 +40,7 @@ float ComputeG2PLight(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0){
 	return GTerm;
 }
 
-MaterialType DetermineMat(glm::vec3 Kd, glm::vec3 Ks, float Eta){
+MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta){
 	MaterialType Mat = Misc;
 
 	if(Eta != 0.0f){
@@ -72,7 +72,7 @@ Vector Reflect(Vector i, Vector n){
 	return i - 2.0f * n * Dot(n,i);
 }
 	
-glm::vec3 LocalDirSampling(glm::vec3 PrevPos, glm::vec3 Pos, glm::vec3 N, glm::vec3 Kd, glm::vec3 Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput){
+glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput){
 	glm::vec3 LocalDir = glm::vec3(0.0f);
 
 	MaterialType Mat = DetermineMat(Kd, Ks, Eta);
