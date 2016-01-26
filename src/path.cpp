@@ -154,7 +154,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		Prev_Pdf_W_proj = Current_Pdf_W_proj;
 	}
 
-
+	delete insect;
 
 	return Rad;
 }
