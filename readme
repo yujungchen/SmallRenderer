@@ -8,6 +8,7 @@ Features include
 * Thin lens (Not fully verified yet)
 * Path tracing with next event estimation
 * Supported material: Lambertian, Glossy, Glass
+* Support scene defined light source (area light)
 
 Guide
 
