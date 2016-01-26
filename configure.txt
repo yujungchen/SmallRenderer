@@ -1,4 +1,4 @@
-Model ../Model/box2/box2.obj
+Model ../Model/box1d_area/box1d_area.obj
 SceneScale 1.0
 CameraPos 0.0 0.0 -3.7
 CameraUpVector 0.0 1.0 0.0
@@ -8,10 +8,10 @@ AllinFocus 1
 FocalLength 50.0
 SensorWidth 36.0
 SensorHeight 36.0
-ResWidth 512
-SPP 1024
+ResWidth 1024
+SPP 2048
 TestLight 1
 TestLightPos 0.0 0.7 -0.3
-TestLightEmission 2.5 2.5 2.5
-PathDepth 8
+TestLightEmission 0.0 0.0 0.0
+PathDepth 7
 NEE_Enable 1
