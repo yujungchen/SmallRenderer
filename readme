@@ -11,4 +11,4 @@ Features include
 
 Guide
 
-* Before make the project, create a new "obj" folder, then make
+* Before make the project, create a new "obj" folder, make clean, then make
