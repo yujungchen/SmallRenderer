@@ -38,7 +38,7 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	}
 	// Allocate Frame
 	if(m_model->hasLight)
-		m_DirectSampleNum = 128;
+		m_DirectSampleNum = 512;
 	else
 		m_DirectSampleNum = 64;
 	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum);

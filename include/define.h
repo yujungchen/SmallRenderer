@@ -3,8 +3,8 @@
 typedef enum {
 	Diffuse = 0, 
 	Glossy,
-	Phong,
 	Glass,
+	Microfacet,
 	Misc
 } MaterialType;
 

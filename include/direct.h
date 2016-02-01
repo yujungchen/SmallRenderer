@@ -6,6 +6,7 @@
 #include "light.h"
 #include "camera.h"
 #include "radiometry.h"
+#include "define.h"
 
 #pragma once
 

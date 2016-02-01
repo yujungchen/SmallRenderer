@@ -38,6 +38,7 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 	// Progress Illustration
 
 	Intersection *insect = new Intersection();
+	glm::vec3 CameraPos = m_camera->m_CameraPos;
 
 	clock_t begin = clock();
 	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){	
@@ -68,6 +69,9 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				glm::vec3 Emission = glm::vec3(0.0);
 				float Ns = 0.0f;
 				float Eta = 0.0f;
+				MicroFacetType MicroFacet = MarcoSurface;
+				DistributionType Distribution = MarcoDistribution;
+				float Roughness = 0.0f;
 
 				if(m_bvh->Intersect(EyeRay, insect)){
 					float t = insect->uvt[2];
@@ -77,7 +81,11 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				else
 					continue;
 
-				m_bvh->InterpolateGeoV2(EyeRay, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+				//m_bvh->InterpolateGeoV2(EyeRay, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+				m_bvh->IsectGeometry(EyeRay, insect, Pos, N, Kd, Ks, Emission, MicroFacet, Distribution, Roughness, 
+					Ns, Eta, m_PrimList);
+
+
 
 				// If hit light source, directly return color
 				if(isLight(Emission)){
@@ -114,14 +122,21 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 					continue;
 				
 				if(Eta == 0.0f){
-					Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+					if(MicroFacet == MarcoSurface){
+						Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+					}
+					else{
+						glm::vec3 MicroNormal = glm::vec3(0.0f);
+						glm::vec3 BRDF = EvalBRDF(CameraPos, Pos, l_Pos, N, Kd, Ks, Ns, MicroFacet, Distribution, Roughness, MicroNormal, false);
+						Contribution = BRDF * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+					}
 				}
 				
 				m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Contribution;
 			}
 		}
 	}
-	printf("Rendering Done.\n");\
+	printf("Rendering Done.\n");
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	printf("Rendering time:%.3fsec\n\n", elapsed_secs);

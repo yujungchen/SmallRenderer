@@ -17,7 +17,8 @@ PathIntegrator::~PathIntegrator(){
 
 }
 
-glm::vec3 PathIntegrator::NEE(glm::vec3 &Pos, glm::vec3 &PrevPos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta){
+glm::vec3 PathIntegrator::NEE(glm::vec3 &Pos, glm::vec3 &PrevPos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta,
+	MicroFacetType &MicroFacetModel, DistributionType &Distribution, float &Roughness){
 
 	glm::vec3 NEERad = glm::vec3(0.0f);
 	
@@ -52,7 +53,11 @@ glm::vec3 PathIntegrator::NEE(glm::vec3 &Pos, glm::vec3 &PrevPos, glm::vec3 &N, 
 	if(m_bvh->IntersectP(ShadowRay))
 		return NEERad;
 
-	NEERad = EvalPhongBRDF(PrevPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+	glm::vec3 MicroNormal = glm::vec3(0.0f);
+	glm::vec3 BRDF = EvalBRDF(PrevPos, Pos, l_Pos, N, Kd, Ks, Ns, MicroFacetModel, Distribution, Roughness, MicroNormal, false);
+	NEERad = BRDF * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+
+	//NEERad = EvalPhongBRDF(PrevPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
 	
 	return NEERad;
 }
@@ -76,6 +81,9 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 SampleDir = glm::vec3(0.0f);
 	glm::vec3 Throughput = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 PrevPos = m_camera->m_CameraPos;
+	MicroFacetType MicroFacetModel = MarcoSurface;
+	DistributionType Distribution = MarcoDistribution;
+	float Roughness = 0.0f;
 
 	// Pdf Parameter
 	double Pdf_A = 1.0;
@@ -91,6 +99,9 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		Ks = glm::vec3(0.0);
 		Ns = 0.0f;
 		Eta = 0.0f;
+		MicroFacetModel = MarcoSurface;
+		Distribution = MarcoDistribution;
+		Roughness = 0.0f;
 
 		if(m_bvh->Intersect(RaySeg, insect)){
 			float t = insect->uvt[2];
@@ -104,7 +115,9 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		double Current_Pdf_W_proj = 1.0;	
 
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
-		m_bvh->InterpolateGeoV2(RaySeg, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+		//m_bvh->InterpolateGeoV2(RaySeg, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+		m_bvh->IsectGeometry(RaySeg, insect, Pos, N, Kd, Ks, Emission, MicroFacetModel, Distribution, Roughness, 
+		Ns, Eta, m_PrimList);
 
 		// Hit the light source
 		if(isLight(Emission)){
@@ -123,20 +136,20 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		if(m_NEE_Enable){
 			if(Depth > 0){
 				// Next event estimation
-				glm::vec3 Contribution = NEE(Pos, PrevPos, N, Kd, Ks, Ns, Eta);
+				glm::vec3 Contribution = NEE(Pos, PrevPos, N, Kd, Ks, Ns, Eta, MicroFacetModel, Distribution, Roughness);
 				Rad = Rad + Throughput * Contribution;
 			}
 		}
 		else{
 			if(Depth == (PathDepth - 1)){
 				// Next event estimation
-				glm::vec3 Contribution = NEE(Pos, PrevPos, N, Kd, Ks, Ns, Eta);		
+				glm::vec3 Contribution = NEE(Pos, PrevPos, N, Kd, Ks, Ns, Eta, MicroFacetModel, Distribution, Roughness);
 				Rad = Rad + Throughput * Contribution;
 			}
 		}
 
 		// Keep sampling the ray
-		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Eta, Current_Pdf_W_proj, VtxThroughput);
+		SampleDir = LocalDirSampling(PrevPos, Pos, N, Kd, Ks, Ns, Eta, Current_Pdf_W_proj, VtxThroughput, MicroFacetModel);
 		Point P = Point(Pos.x, Pos.y, Pos.z);
 		Vector Dir = Vector(SampleDir.x, SampleDir.y, SampleDir.z);
 		RaySeg = Ray(P, Dir, EPSILON);

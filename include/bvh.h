@@ -6,6 +6,7 @@
 #include "glm.h"
 #include <glm/glm.hpp>
 
+
 #pragma once
 
 extern GLMmodel* model;
@@ -75,6 +76,9 @@ public:
     //bool IntersectGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, std::vector<Primitive> m_PrimList);
     void InterpolateGeo(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
     void InterpolateGeoV2(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
+
+    void IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, 
+                        MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
 
 public:
     

@@ -1,5 +1,6 @@
 #include "radiometry.h"
 #include "utility.h"
+#include "sampler.h"
 
 
 glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns){
@@ -14,6 +15,32 @@ glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::
 	GlossyFactor = (Ns + 2.0f) * 0.5f * INV_PI * pow(CosAlpha, Ns);
 
 	BRDF = Kd * INV_PI + GlossyFactor * Ks;
+	return BRDF;
+}
+
+
+glm::vec3 EvalBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, 
+				MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, 
+				glm::vec3 &MicroNormal, bool isNEE){
+	glm::vec3 BRDF = glm::vec3(0.0f);
+
+	if(MicroFacet == MarcoSurface){
+		float GlossyFactor = 0.0f;
+
+		glm::vec3 v2Tov1 = glm::normalize(Pos1 - Pos2);
+		glm::vec3 v1Tov0 = glm::normalize(Pos0 - Pos1);
+		glm::vec3 v2Reflect = glm::normalize(glm::reflect(v2Tov1, N));
+		float CosAlpha = glm::max(glm::dot(v1Tov0, v2Reflect), 0.0f);
+		GlossyFactor = (Ns + 2.0f) * 0.5f * INV_PI * pow(CosAlpha, Ns);
+
+		BRDF = Kd * INV_PI + GlossyFactor * Ks;
+	}
+	else{
+		BRDF = ComputeTorranceMicroFacetBRDF(Pos0, Pos1, Pos2, N, Kd, Ks, Ns, Distribution, Roughness, MicroNormal);
+		//if(BRDF.x < 0.0f || BRDF.y < 0.0f || BRDF.z < 0.0f)
+		//	printf("%f %f %f\n", BRDF.x, BRDF.y, BRDF.z);
+	}
+
 	return BRDF;
 }
 
@@ -40,42 +67,42 @@ float ComputeG2PLight(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0){
 	return GTerm;
 }
 
-MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta){
+MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta, MicroFacetType &MicroFacetModel){
 	MaterialType Mat = Misc;
 
-	if(Eta != 0.0f){
-		Mat = Glass;
+	if(MicroFacetModel != MarcoSurface){
+		return Microfacet;
 	}
 	else{
-		if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
-		   (Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0))
-		{
-			Mat = Phong;
-		}
-		else if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
-		   		(Ks.x == 0.0 && Ks.y == 0.0 && Ks.z == 0.0)){
-			Mat = Diffuse;
-		}
-		else if((Kd.x == 0.0 && Kd.y == 0.0 && Kd.z == 0.0) && 
-		   		(Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0)){
-			Mat = Glossy;
+		if(Eta != 0.0f){
+			Mat = Glass;
 		}
 		else{
-			Mat = Misc;
-			printf("Unknown Material!\n");
+			if((Kd.x > 0.0 || Kd.y > 0.0 || Kd.z > 0.0) && 
+			   		(Ks.x == 0.0 && Ks.y == 0.0 && Ks.z == 0.0)){
+				Mat = Diffuse;
+			}
+			else if((Kd.x == 0.0 && Kd.y == 0.0 && Kd.z == 0.0) && 
+			   		(Ks.x > 0.0 || Ks.y > 0.0 || Ks.z > 0.0)){
+				Mat = Glossy;
+			}
+			else{
+				Mat = Misc;
+				printf("Unknown Material!\n");
+			}
 		}
 	}
-
 	return Mat;
 }
 Vector Reflect(Vector i, Vector n){
 	return i - 2.0f * n * Dot(n,i);
 }
 	
-glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput){
+glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput, 
+	MicroFacetType &MicroFacetModel){
 	glm::vec3 LocalDir = glm::vec3(0.0f);
 
-	MaterialType Mat = DetermineMat(Kd, Ks, Eta);
+	MaterialType Mat = DetermineMat(Kd, Ks, Eta, MicroFacetModel);
 
 	glm::vec3 U = glm::vec3(0.0f);
 	glm::vec3 V = glm::vec3(0.0f);
@@ -162,7 +189,36 @@ glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm
 
 			break;
 		}
-		case Phong:{
+		case Microfacet:{
+			// Compute Torrance Sparrow Microfacet Model
+			// Use Blinn-Phong Distribution Function
+			DistributionType Default = BlinnPhong;
+			glm::vec3 MicroNormal = SampleMicroNormal(N, Ns, Default);
+	
+			// Compute Outgoing Vector
+			glm::vec3 InVec = glm::normalize(Pos - PrevPos);
+			LocalDir = glm::reflect(InVec, MicroNormal);
+
+			float NdotL = glm::dot(N, LocalDir);
+			float NdotV = fmax(glm::dot(N, InVec * (-1.0f)), 0.0f);
+			float VdotH = fmax(glm::dot(InVec * (-1.0f), MicroNormal), 0.0f);
+			// Compute F
+			float OneMinusVdotH = (1.0f - VdotH);
+			float F = OneMinusVdotH * OneMinusVdotH * OneMinusVdotH * OneMinusVdotH * OneMinusVdotH;
+			float F0 = 0.8;
+			F = F * (1.0 - F0);
+			F = F + F0;
+
+			float FormFactor = 0.0f;
+			float MinVal = fmin(VdotH, fmin(2.0f * NdotL, 2.0f * NdotV));
+			if(NdotV == 0.0f){
+				FormFactor = 0.0f;
+			}
+			else{
+				FormFactor = fmax(F * MinVal / NdotV, 0.0f);
+			}
+
+			Throughput = Kd + Ks * FormFactor;
 			break;
 		}
 		case Misc:{

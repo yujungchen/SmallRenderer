@@ -46,3 +46,17 @@ glm::vec3 TriBaryUVSampler(){
 
 	return glm::vec3(U, V, T);
 }
+
+glm::vec3 BlinnPhongSampler(float Ns){
+	float u1 = RandomNumber();
+	float u2 = RandomNumber();
+	// PBRT and Mitsuba use (Ns + 1.0f)
+	float CosTheta = powf(u1, 1.0f / (Ns + 1.0f) );
+	float Phi = u2 * 2.0f * (float)M_PI;
+	float SinTheta = sqrt(1.0f - CosTheta * CosTheta);
+  
+	float x = cos(Phi) * SinTheta;
+	float y = sin(Phi) * SinTheta;
+	float z = CosTheta;
+	return glm::vec3(x, y, z);
+}
