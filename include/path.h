@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include "bvh.h"
 #include "light.h"
+#include "dipole.h"
 #include "camera.h"
 #include "radiometry.h"
 
@@ -14,7 +15,8 @@ class PathIntegrator{
   
 public:
 	PathIntegrator(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
-				   PointLight *_l, AreaLight *_al, Camera *_camera, bool _NEE_Enable, bool _UseAreaLight);
+				   PointLight *_l, AreaLight *_al, Camera *_camera, bool _NEE_Enable, bool _UseAreaLight, 
+				   Dipole *_Dipole);
 	~PathIntegrator();
 
 	glm::vec3 ComputeRadiance(int sample_x, int sample_y, int PathDepth);
@@ -30,6 +32,7 @@ private:
 	PointLight *m_l;
 	AreaLight *m_al;
 	Camera *m_camera;
+	Dipole *m_Dipole;
 
 	bool m_NEE_Enable;
 	bool m_UseAreaLight;

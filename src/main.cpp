@@ -112,7 +112,6 @@ int main(int argc, char **argv){
 		printf("Image Size = %d x %d\n",m_ResWidth, m_ResHeight);
 	}
 
-
 	// Read Scene
 	UnitizeScene(m_SceneScale);
 	for (uint32_t i = 0; i < model->numtriangles; i++) {
@@ -134,6 +133,9 @@ int main(int argc, char **argv){
 		//printf("Apply area light source\n");
 		al = new AreaLight(model);
 	}
+
+
+
 
 	// Configure Camera
 	Camera *cam = new Camera(m_CameraPos, m_CameraLookat, m_CameraUp,

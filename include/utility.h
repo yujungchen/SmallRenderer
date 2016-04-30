@@ -647,3 +647,11 @@ inline bool isLight(glm::vec3 &Emission){
     return isL;
 }
 
+inline bool isZero(glm::vec3 Var){
+    bool Zero = false;
+
+    if(Var.x == 0.0f && Var.y == 0.0f && Var.z == 0.0f)
+        Zero = true;
+
+    return Zero;
+}

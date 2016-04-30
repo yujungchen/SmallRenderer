@@ -223,7 +223,7 @@ void ReadConfigure(char *SceneFile,
 		}	
 		else{
 			//printf("Seriously!?\n");
-			printf("\nPlease Check Your Scene File.\n");
+			printf("\nPlease Check Your Scene File. (%s)\n", Item);
 			break;
 		}
 	}

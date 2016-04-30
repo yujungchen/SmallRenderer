@@ -7,6 +7,8 @@
 #include "camera.h"
 #include "path.h"
 #include "direct.h"
+#include "dipole.h"
+
 
 #pragma once
 
@@ -31,6 +33,7 @@ private:
 	AreaLight *m_al;
 	Camera *m_camera;
 	DirectIllumination *m_Direct;
+	Dipole *m_Dipole;
 
 	int m_Width;
 	int m_Height;

@@ -19,6 +19,8 @@ float ComputeG(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &N0, glm::vec3 &N1);
 float ComputeG2PLight(glm::vec3 Pos0, glm::vec3 Pos1, glm::vec3 N0);
 MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta, MicroFacetType &MicroFacet);
 
+bool isVolume(glm::vec3 Sigma_a, glm::vec3 Sigma_s);
+
 class PathVtx{
 
 public:
@@ -52,3 +54,5 @@ public:
 
 glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput, 
 	MicroFacetType &MicroFacet);
+
+glm::vec3 DiffuseDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd);

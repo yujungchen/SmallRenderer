@@ -404,14 +404,31 @@ void BVHAccel::InterpolateGeoV2(Ray &ray, Intersection *isect, glm::vec3 &Pos, g
 	Eta = _Eta;
 }
 
+
+char *BVHAccel::GetMatName(){
+	return m_MatName;
+}
+
 void BVHAccel::IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, 
-	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList) {
+	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList, 
+	glm::vec3 &Sigma_a, glm::vec3 &Sigma_s) {
 	
 	// Store Geo
 	Vector _Kd, _Ks, _Emission;
 	float _Ns;	
 	float _Eta;
-	m_PrimList[isect->triId].GetMaterial(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Emission, _Ns, _Eta, MicroFacet, Distribution, Roughness);
+
+	Vector _Sigma_a;
+	Vector _Sigma_s;
+
+	m_PrimList[isect->triId].GetMaterial(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Emission, _Ns, _Eta, MicroFacet, Distribution, Roughness, 
+		_Sigma_a, _Sigma_s);
+
+	Sigma_a = glm::vec3(_Sigma_a.x, _Sigma_a.y, _Sigma_a.z);
+	Sigma_s = glm::vec3(_Sigma_s.x, _Sigma_s.y, _Sigma_s.z);
+
+	//printf("%s\n", m_PrimList[isect->triId].GetMaterialName());
+	m_MatName = m_PrimList[isect->triId].GetMaterialName();
 
 	// Position
 	Pos = glm::vec3(0.0f, 0.0f, 0.0f);

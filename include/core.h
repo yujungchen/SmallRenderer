@@ -39,7 +39,10 @@ public:
     void GetKdKsNsEta(float u, float v, Vector &Kd, Vector &Ks, float &Ns, float &Eta);
 	void GetKdKsNsEtaEmission(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta);
     void GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta, 
-        MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness);
+        MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, 
+        Vector &Sigmna_a, Vector &Sigmna_s);
+
+    char *GetMaterialName();
 	
     // Primitive Public Data
     uint32_t primitiveId;

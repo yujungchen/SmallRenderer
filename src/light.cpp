@@ -18,6 +18,23 @@ glm::vec3 PointLight::getlpos(){
 }
 
 
+float AreaLight::ComputeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
+	float area = 0.0f;
+	
+	float d_a = glm::length(A - B);	
+	float d_b = glm::length(B - C);
+	float d_c = glm::length(C - A);
+
+	float s = (d_a + d_b + d_c) * 0.5f;
+	area = sqrt(s * (s - d_a) * (s - d_b) * (s - d_c));
+
+	return area;
+}
+
+float AreaLight::getPdf(int TriIdx) {
+	return m_Tri_l[TriIdx].pdf;
+}
+
 /* Define Area Light Primitive*/
 AreaLight::AreaLight(GLMmodel *model){
 	m_Num_lTri = model->numLightTri;
@@ -46,7 +63,13 @@ AreaLight::AreaLight(GLMmodel *model){
 			//printf("[N%d] %f ", vIdx, m_Tri_l[Idx].N[vIdx].x);	printf("%f ", m_Tri_l[Idx].N[vIdx].y);	printf("%f\n", m_Tri_l[Idx].N[vIdx].z);
 		}
 		//printf("\n");
+
+		m_Tri_l[Idx].Area = ComputeArea(m_Tri_l[Idx].V[0], m_Tri_l[Idx].V[1], m_Tri_l[Idx].V[2]);
+		m_Tri_l[Idx].pdf = 1.0f / m_Tri_l[Idx].Area;
+		m_Tri_l[Idx].pdf = m_Tri_l[Idx].pdf/ (float)model->numLightTri;
+		printf("Light Tri %d Area : %f Pdf : %f\n", Idx, m_Tri_l[Idx].Area, m_Tri_l[Idx].pdf);
 	}
+
 
 }
 

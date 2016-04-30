@@ -78,7 +78,10 @@ public:
     void InterpolateGeoV2(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
 
     void IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, 
-                        MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList);
+                        MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList, 
+                        glm::vec3 &Sigma_a, glm::vec3 &Sigma_s);
+
+    char *GetMatName();
 
 public:
     
@@ -86,5 +89,7 @@ public:
     std::vector<Primitive> primitives;
     uint32_t maxPrimsInNode;
     LinearBVHNode *nodes;
+
+    char *m_MatName;
 };
 

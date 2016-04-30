@@ -23,15 +23,20 @@ typedef struct{
 	glm::vec3 Kd;
 	glm::vec3 Emission;
 	float Area;
+	float pdf;
 } LightTri;
 
 class AreaLight{
 public:
 	AreaLight(GLMmodel *_model);
 	~AreaLight();
+	float ComputeArea(glm::vec3 A, glm::vec3 B, glm::vec3 C);
+	float getPdf(int TriIdx);
 	glm::vec3 sampleL(glm::vec3 &Pos, glm::vec3 &N);
-	
+
 private:
 	int m_Num_lTri;
 	LightTri *m_Tri_l;
+	
+
 };

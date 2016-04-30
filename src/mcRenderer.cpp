@@ -9,7 +9,7 @@
 MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
 					   PointLight *_l, AreaLight *_al, Camera *_camera,
 					   int _Width, int _Height, float _AspectRatio, int _PathSample, float _FocusDist,
-					   int _PathDepth, bool _NEE_Enable){
+					   int _PathDepth, bool _NEE_Enable) {
 	m_model = _model;
 	m_bvh = _bvh;
 	m_l = _l;
@@ -38,10 +38,38 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	}
 	// Allocate Frame
 	if(m_model->hasLight)
-		m_DirectSampleNum = 512;
+		m_DirectSampleNum = 256;
 	else
 		m_DirectSampleNum = 64;
-	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum);
+	
+	//  Construct SSS Material
+	int TotalSSSMat = 0;
+	printf("\nProcessing SSS Material...\n");
+	for(int idx ; idx < m_model->nummaterials ; idx++) {
+		if( m_model->materials[idx].sigma_a[0] > 0.0f || m_model->materials[idx].sigma_a[1] > 0.0f || m_model->materials[idx].sigma_a[2] > 0.0f ||
+			m_model->materials[idx].sigma_s[0] > 0.0f || m_model->materials[idx].sigma_s[1] > 0.0f || m_model->materials[idx].sigma_s[2] > 0.0f){
+			TotalSSSMat++;
+		}
+	}
+	printf("Total %d SSS Mat\n", TotalSSSMat);
+
+	m_Dipole = new Dipole[TotalSSSMat];
+
+	int SSSidx = 0;
+	for(int idx ; idx < m_model->nummaterials ; idx++) {
+		if( m_model->materials[idx].sigma_a[0] > 0.0f || m_model->materials[idx].sigma_a[1] > 0.0f || m_model->materials[idx].sigma_a[2] > 0.0f ||
+			m_model->materials[idx].sigma_s[0] > 0.0f || m_model->materials[idx].sigma_s[1] > 0.0f || m_model->materials[idx].sigma_s[2] > 0.0f){
+			glm::vec3 Sigma_a = glm::vec3(m_model->materials[idx].sigma_a[0], m_model->materials[idx].sigma_a[1], m_model->materials[idx].sigma_a[2]);
+			glm::vec3 Sigma_s = glm::vec3(m_model->materials[idx].sigma_s[0], m_model->materials[idx].sigma_s[1], m_model->materials[idx].sigma_s[2]);
+			m_Dipole[SSSidx].DipoleConfiguration(m_model->materials[idx].name, Sigma_a, Sigma_s, m_model->materials[idx].eta, 
+				m_model, m_bvh, m_PrimList);
+			//m_Dipole[SSSidx].PrintDipoleInfo();
+			SSSidx++;
+		}
+	}
+	//  Construct SSS Material
+	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum, m_Dipole);
+	
 }
 
 MCRenderer::~MCRenderer(){
@@ -66,7 +94,7 @@ void MCRenderer::Render(){
 	printf("Start Rendering\n");
 
 
-	PathIntegrator *Path = new PathIntegrator(m_model, m_bvh, m_PrimList, m_l, m_al, m_camera, m_NEE_Enable, m_model->hasLight);
+	PathIntegrator *Path = new PathIntegrator(m_model, m_bvh, m_PrimList, m_l, m_al, m_camera, m_NEE_Enable, m_model->hasLight, m_Dipole);
 	clock_t begin = clock();
 
 	for(int SampleNum = 0 ; SampleNum < m_PathSample ; SampleNum++){		

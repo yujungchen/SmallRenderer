@@ -252,10 +252,12 @@ void Primitive::GetKdKsNsEtaEmission(float u, float v, Vector &Kd, Vector &Ks, V
 }
 
 void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta, 
-	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness) {
+	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, 
+	Vector &Sigmna_a, Vector &Sigmna_s) {
 
 	GLMtriangle tri = model->triangles[primitiveId];
 	GLMmaterial mtl = model->materials[tri.matId];
+	
 	if(mtl.diffuse_map[0] != '\0') {
 		int width = mtl.width;
 		int height = mtl.height;
@@ -264,12 +266,16 @@ void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Em
 		Vector interpolatedTex(mtl.texelData[index*3]/255.f, mtl.texelData[index*3+1]/255.f, mtl.texelData[index*3+2]/255.f);
 		Kd = Vector(mtl.diffuse[0]*interpolatedTex.x, mtl.diffuse[1]*interpolatedTex.y, mtl.diffuse[2]*interpolatedTex.z);
 		Ks = Vector(mtl.specular[0]*interpolatedTex.x, mtl.specular[1]*interpolatedTex.y, mtl.specular[2]*interpolatedTex.z);
+		Sigmna_a = Vector(mtl.sigma_a[0], mtl.sigma_a[1], mtl.sigma_a[2]);
+		Sigmna_s = Vector(mtl.sigma_s[0], mtl.sigma_s[1], mtl.sigma_s[2]);
 		Ns = mtl.shininess;
 		Eta = mtl.eta;
 	} else {
 		Kd = Vector(mtl.diffuse[0], mtl.diffuse[1], mtl.diffuse[2]);
 		Ks = Vector(mtl.specular[0], mtl.specular[1], mtl.specular[2]);
 		Emission = Vector(mtl.emissive[0], mtl.emissive[1], mtl.emissive[2]);
+		Sigmna_a = Vector(mtl.sigma_a[0], mtl.sigma_a[1], mtl.sigma_a[2]);
+		Sigmna_s = Vector(mtl.sigma_s[0], mtl.sigma_s[1], mtl.sigma_s[2]);
 		Ns = mtl.shininess;
 		Eta = mtl.eta;
 	}
@@ -278,4 +284,11 @@ void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Em
 	Distribution = mtl.DFunction;
 	Roughness = mtl.Roughness;
 
+}
+
+char *Primitive::GetMaterialName(){
+	GLMtriangle tri = model->triangles[primitiveId];
+	GLMmaterial mtl = model->materials[tri.matId];
+	
+	return mtl.name;
 }

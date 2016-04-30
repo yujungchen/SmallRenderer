@@ -12,6 +12,7 @@
 // For SUTILAPI
 //#include "sutil.h"
  #include "define.h"
+ //#include "dipole.h"
 
 /* includes */
 
@@ -82,6 +83,10 @@ typedef struct _GLMmaterial
   DistributionType DFunction;
   float Roughness;
 
+  // SSS Parameter
+  float sigma_a[3];
+  float sigma_s[3];
+
 } GLMmaterial;
 
 /* GLMtriangle: Structure that defines a triangle in a model.
@@ -145,6 +150,10 @@ typedef struct {
   bool hasLight;
   unsigned int numLightTri;
   GLMtriangle *m_areaLight; 
+
+  /* Define BSSRDF Material*/
+  bool hasSSSMat;
+  int NumSSSMat;
 
 } GLMmodel;
 

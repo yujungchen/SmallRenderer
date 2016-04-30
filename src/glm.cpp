@@ -326,6 +326,8 @@ _glmReadMTL(GLMmodel* model, char* name)
   /* allocate memory for the materials */
   model->materials = (GLMmaterial*)malloc(sizeof(GLMmaterial) * nummaterials);
   model->nummaterials = nummaterials;
+  model->hasSSSMat = false;
+  model->NumSSSMat = 0;
 
 
   char  TempBuf[64];
@@ -377,13 +379,22 @@ _glmReadMTL(GLMmodel* model, char* name)
 
     model->materials[i].Micro = MarcoSurface;
     model->materials[i].DFunction = MarcoDistribution;
-    model->materials[i].Roughness = 0.0f;   
+    model->materials[i].Roughness = 0.0f;
+
+    // SSS Parameter
+    model->materials[i].sigma_a[0] = 0.0f;
+    model->materials[i].sigma_a[1] = 0.0f;
+    model->materials[i].sigma_a[2] = 0.0f;
+    model->materials[i].sigma_s[0] = 0.0f;
+    model->materials[i].sigma_s[1] = 0.0f;
+    model->materials[i].sigma_s[2] = 0.0f;
 
   }
   model->materials[0].name = strdup("NO_ASSIGNED_MATERIAL");
 
   /* now, read in the data */
   nummaterials = 0;
+
   while(fscanf(file, "%s", buf) != EOF) {
     switch(buf[0]) {
       case '#':       /* comment */
@@ -400,6 +411,7 @@ _glmReadMTL(GLMmodel* model, char* name)
         sscanf(buf, "%s %s", buf, buf);
         nummaterials++;
         model->materials[nummaterials].name = strdup(buf);
+
         break;
       case 'N':
         fscanf(file, "%f", &model->materials[nummaterials].shininess);
@@ -516,6 +528,30 @@ _glmReadMTL(GLMmodel* model, char* name)
                 &model->materials[nummaterials].ambient[0],
                 &model->materials[nummaterials].ambient[1],
                 &model->materials[nummaterials].ambient[2]);
+            break;
+          default:
+            /* eat up rest of line */
+            fgets(buf, sizeof(buf), file);
+            break;
+        }
+        break;
+
+      case 's':
+        switch(buf[1]) {
+          case 's':
+            fscanf(file, "%f %f %f",
+                &model->materials[nummaterials].sigma_s[0],
+                &model->materials[nummaterials].sigma_s[1],
+                &model->materials[nummaterials].sigma_s[2]);
+                //printf("Sigma_s (%f %f %f)\n", model->materials[nummaterials].sigma_s[0], model->materials[nummaterials].sigma_s[1], model->materials[nummaterials].sigma_s[2]);
+            break;
+          case 'a':
+            fscanf(file, "%f %f %f",
+                &model->materials[nummaterials].sigma_a[0],
+                &model->materials[nummaterials].sigma_a[1],
+                &model->materials[nummaterials].sigma_a[2]);
+
+            //printf("Sigma_a (%f %f %f)\n", model->materials[nummaterials].sigma_a[0], model->materials[nummaterials].sigma_a[1], model->materials[nummaterials].sigma_a[2]);
             break;
           default:
             /* eat up rest of line */

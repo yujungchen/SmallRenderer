@@ -1,12 +1,14 @@
 #include "direct.h"
 #include "time.h"
+#include <string.h>
 
 //#define OMP
 #define EPSILON 0.0001f
 
 DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
 					   PointLight *_l, AreaLight *_al, Camera *_camera, 
-					   int _Width, int _Height, int _PathSample){
+					   int _Width, int _Height, int _PathSample, 
+					   Dipole *_Dipole){
 	m_model = _model;
 	m_bvh = _bvh;
 	m_l = _l;
@@ -19,6 +21,8 @@ DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::ve
 	m_useArealight = false;
 	if(m_model->hasLight)
 		m_useArealight = true;
+
+	m_Dipole = _Dipole;
 }
 
 DirectIllumination::~DirectIllumination(){
@@ -27,6 +31,8 @@ DirectIllumination::~DirectIllumination(){
 
 
 void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
+
+	//m_dipole->PrintDipoleInfo();
 
 	printf("Direct Illumination\n");
 	// Progress Illustration
@@ -67,6 +73,9 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				glm::vec3 Kd = glm::vec3(0.0);
 				glm::vec3 Ks = glm::vec3(0.0);
 				glm::vec3 Emission = glm::vec3(0.0);
+				glm::vec3 Sigma_a = glm::vec3(0.0);
+				glm::vec3 Sigma_s = glm::vec3(0.0);
+				
 				float Ns = 0.0f;
 				float Eta = 0.0f;
 				MicroFacetType MicroFacet = MarcoSurface;
@@ -82,17 +91,28 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 					continue;
 
 				//m_bvh->InterpolateGeoV2(EyeRay, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
+				char *MatName;
+				bool isVol = false;
 				m_bvh->IsectGeometry(EyeRay, insect, Pos, N, Kd, Ks, Emission, MicroFacet, Distribution, Roughness, 
-					Ns, Eta, m_PrimList);
-
-
-
+					Ns, Eta, m_PrimList, Sigma_a, Sigma_s);
+				
 				// If hit light source, directly return color
 				if(isLight(Emission)){
 					Contribution = Kd;
 					m_Img[CurrentPxlIdx] = m_Img[CurrentPxlIdx] + Contribution;
 					continue;
 				}
+
+				// Determine volume or not
+				if(isZero(Sigma_a) == true && isZero(Sigma_s) == true)
+					isVol = false;
+				else{
+					isVol = true;
+					MatName = m_bvh->GetMatName();
+					//printf("Sigma_a = %f %f %f\n", Sigma_a.x, Sigma_a.y, Sigma_a.z);
+					//printf("Sigma_s = %f %f %f\n", Sigma_s.x, Sigma_s.y, Sigma_s.z);
+				}
+
 
 				// Direct Illumination
 				// Sample light source
@@ -121,14 +141,21 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				if(m_bvh->IntersectP(ShadowRay))
 					continue;
 				
-				if(Eta == 0.0f){
-					if(MicroFacet == MarcoSurface){
-						Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
-					}
-					else{
-						glm::vec3 MicroNormal = glm::vec3(0.0f);
-						glm::vec3 BRDF = EvalBRDF(CameraPos, Pos, l_Pos, N, Kd, Ks, Ns, MicroFacet, Distribution, Roughness, MicroNormal, false);
-						Contribution = BRDF * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+				if(isVol){
+					glm::vec3 DL_Radiance = ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+					glm::vec3 ScatteringFactor = m_Dipole->ComputeRadiance(l_Pos, l_N, Pos, N, m_camera->m_CameraPos, Kd);
+					Contribution = ScatteringFactor * DL_Radiance;
+				}
+				else{
+					if(Eta == 0.0f){
+						if(MicroFacet == MarcoSurface){
+							Contribution = EvalPhongBRDF(m_camera->m_CameraPos, Pos, l_Pos, N, Kd, Ks, Ns) * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+						}
+						else{
+							glm::vec3 MicroNormal = glm::vec3(0.0f);
+							glm::vec3 BRDF = EvalBRDF(CameraPos, Pos, l_Pos, N, Kd, Ks, Ns, MicroFacet, Distribution, Roughness, MicroNormal, false);
+							Contribution = BRDF * ComputeG(Pos, l_Pos, N, l_N) * l_emission;
+						}
 					}
 				}
 				

@@ -16,6 +16,7 @@ glm::vec3 EvalPhongBRDF(glm::vec3 &Pos0, glm::vec3 &Pos1, glm::vec3 &Pos2, glm::
 
 	BRDF = Kd * INV_PI + GlossyFactor * Ks;
 	return BRDF;
+	
 }
 
 
@@ -97,6 +98,30 @@ MaterialType DetermineMat(glm::vec3 &Kd, glm::vec3 &Ks, float &Eta, MicroFacetTy
 Vector Reflect(Vector i, Vector n){
 	return i - 2.0f * n * Dot(n,i);
 }
+
+bool isVolume(glm::vec3 Sigma_a, glm::vec3 Sigma_s){
+	bool Volume = true;
+
+	if(isZero(Sigma_a) && isZero(Sigma_s))
+		Volume = false;
+
+	return Volume;
+}
+
+glm::vec3 DiffuseDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd) {
+	glm::vec3 LocalP = glm::vec3(0.0f);
+	
+	glm::vec3 LocalDir = glm::vec3(0.0f);
+	glm::vec3 U = glm::vec3(0.0f);
+	glm::vec3 V = glm::vec3(0.0f);
+	
+	LocalP = CosHemiSampler();
+	LocalBasis(N, &U, &V);
+	LocalDir = V * LocalP.x + U * LocalP.y + N * LocalP.z;
+
+	return LocalDir;
+}
+
 	
 glm::vec3 LocalDirSampling(glm::vec3 &PrevPos, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, float Ns, float Eta, double &Pdf_W_proj, glm::vec3 &Throughput, 
 	MicroFacetType &MicroFacetModel){
