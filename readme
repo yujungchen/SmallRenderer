@@ -7,8 +7,12 @@ Features include
 
 * Thin lens (Not fully verified yet)
 * Path tracing with next event estimation
-* Supported material: Lambertian, Glossy, Glass
+* Supported material: Lambertian, Glossy, Glass, 
 * Support scene defined light source (area light)
+
+* Experimental microfacet model
+* Experimental dipole model
+(However, I am really confused about the BSSRDF parameters. Therefore, I scale the BSSRDF contribution with some hand-tuning scale.)
 
 Guide
 
