@@ -75,6 +75,8 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 	glm::vec3 N = glm::vec3(0.0);
 	glm::vec3 Kd = glm::vec3(0.0);
 	glm::vec3 Ks = glm::vec3(0.0);
+	glm::vec3 Kb = glm::vec3(0.0);
+	bool hasBump = false;
 	glm::vec3 Sigma_a = glm::vec3(0.0);
 	glm::vec3 Sigma_s = glm::vec3(0.0);
 	float Ns = 0.0f;
@@ -102,6 +104,8 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		N = glm::vec3(0.0);
 		Kd = glm::vec3(0.0);
 		Ks = glm::vec3(0.0);
+		Kb = glm::vec3(0.0);
+		hasBump = false;
 		Ns = 0.0f;
 		Eta = 0.0f;
 		Sigma_a = glm::vec3(0.0);
@@ -126,7 +130,7 @@ glm::vec3 PathIntegrator::ComputeRadiance(int sample_x, int sample_y, int PathDe
 		//m_bvh->InterpolateGeoV2(RaySeg, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
 		char *MatName;
 		bool isVol = false;
-		m_bvh->IsectGeometry(RaySeg, insect, Pos, N, Kd, Ks, Emission, MicroFacetModel, Distribution, Roughness, Ns, Eta, m_PrimList, Sigma_a, Sigma_s);
+		m_bvh->IsectGeometry(RaySeg, insect, Pos, N, Kd, Ks, Kb, hasBump, Emission, MicroFacetModel, Distribution, Roughness, Ns, Eta, m_PrimList, Sigma_a, Sigma_s);
 
 		if(isZero(Sigma_a) == true && isZero(Sigma_s) == true) {
 			isVol = false;

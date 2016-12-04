@@ -38,7 +38,7 @@ public:
 	void GetKdKsNs(float u, float v, Vector &Kd, Vector &Ks, float &Ns);
     void GetKdKsNsEta(float u, float v, Vector &Kd, Vector &Ks, float &Ns, float &Eta);
 	void GetKdKsNsEtaEmission(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta);
-    void GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta, 
+    void GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Kb, bool &hasBump, Vector &Emission, float &Ns, float &Eta, 
         MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, 
         Vector &Sigmna_a, Vector &Sigmna_s);
 

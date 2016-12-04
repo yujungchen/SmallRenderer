@@ -52,6 +52,7 @@ typedef struct _GLMmaterial
   float ambient[4];       // Ka ambient component
   float specular[4];      // Ks specular component
   float emissive[4];      // emissive component
+  float bump[4];      // emissive component
   float shininess;        // Ns specular exponent
   float refraction;       // Tr
   float alpha;            // d
@@ -64,12 +65,14 @@ typedef struct _GLMmaterial
   char  diffuse_map [MaxStringLength]; // map_Kd
   char  specular_map[MaxStringLength]; // map_Ks
   char  dissolve_map[MaxStringLength]; // map_D
+  char  bump_map[MaxStringLength]; // map_Bump
 
   // Scaling for texture maps (initialized to 0 for not set)
   float ambient_map_scaling[2];
   float diffuse_map_scaling[2];
   float specular_map_scaling[2];
   float dissolve_map_scaling[2];
+  float bump_map_scaling[2];
   
   
   // texture
@@ -77,6 +80,7 @@ typedef struct _GLMmaterial
   int height;
   int mode;
   unsigned char *texelData;
+  unsigned char *bumpData;
 
   // Microfacet model
   MicroFacetType Micro;

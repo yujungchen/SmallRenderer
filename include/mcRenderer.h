@@ -8,6 +8,7 @@
 #include "path.h"
 #include "direct.h"
 #include "dipole.h"
+#include "volume.h"
 
 
 #pragma once
@@ -34,6 +35,7 @@ private:
 	Camera *m_camera;
 	DirectIllumination *m_Direct;
 	Dipole *m_Dipole;
+	Volume *m_Volume;
 
 	int m_Width;
 	int m_Height;

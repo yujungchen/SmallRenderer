@@ -409,19 +409,19 @@ char *BVHAccel::GetMatName(){
 	return m_MatName;
 }
 
-void BVHAccel::IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Emission, 
+void BVHAccel::IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm::vec3 &N, glm::vec3 &Kd, glm::vec3 &Ks, glm::vec3 &Kb, bool &hasBump, glm::vec3 &Emission, 
 	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, float &Ns, float &Eta, std::vector<Primitive> &m_PrimList, 
 	glm::vec3 &Sigma_a, glm::vec3 &Sigma_s) {
 	
 	// Store Geo
-	Vector _Kd, _Ks, _Emission;
+	Vector _Kd, _Ks, _Kb, _Emission;
 	float _Ns;	
 	float _Eta;
 
 	Vector _Sigma_a;
 	Vector _Sigma_s;
 
-	m_PrimList[isect->triId].GetMaterial(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Emission, _Ns, _Eta, MicroFacet, Distribution, Roughness, 
+	m_PrimList[isect->triId].GetMaterial(isect->uvt[0], isect->uvt[1], _Kd, _Ks, _Kb, hasBump, _Emission, _Ns, _Eta, MicroFacet, Distribution, Roughness, 
 		_Sigma_a, _Sigma_s);
 
 	Sigma_a = glm::vec3(_Sigma_a.x, _Sigma_a.y, _Sigma_a.z);
@@ -449,10 +449,23 @@ void BVHAccel::IsectGeometry(Ray &ray, Intersection *isect, glm::vec3 &Pos, glm:
 	// Material and Albedo
 	Kd = glm::vec3(0.0f, 0.0f, 0.0f);
 	Ks = glm::vec3(0.0f, 0.0f, 0.0f);
+	Kb = glm::vec3(0.0f, 0.0f, 0.0f);
 	Ns = 0.0f;
 	
 	Kd = glm::vec3(_Kd.x, _Kd.y, _Kd.z);
 	Ks = glm::vec3(_Ks.x, _Ks.y, _Ks.z);
+	Kb = glm::vec3(_Kb.x, _Kb.y, _Kb.z);
+
+	if(hasBump){
+		glm::vec3 T = glm::vec3(0.0);
+		glm::vec3 B = glm::vec3(0.0);
+
+		LocalBasis(N, &T, &B);
+		N = T * Kb.x + B * Kb.y + N * Kb.z;
+		
+	}
+
+
 	Emission = glm::vec3(_Emission.x, _Emission.y, _Emission.z);
 	Ns = _Ns;
 

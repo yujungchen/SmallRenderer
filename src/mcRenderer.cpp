@@ -54,6 +54,8 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 	printf("Total %d SSS Mat\n", TotalSSSMat);
 
 	m_Dipole = new Dipole[TotalSSSMat];
+	m_Volume = new Volume[TotalSSSMat];
+
 
 	int SSSidx = 0;
 	for(int idx ; idx < m_model->nummaterials ; idx++) {
@@ -63,12 +65,15 @@ MCRenderer::MCRenderer(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> 
 			glm::vec3 Sigma_s = glm::vec3(m_model->materials[idx].sigma_s[0], m_model->materials[idx].sigma_s[1], m_model->materials[idx].sigma_s[2]);
 			m_Dipole[SSSidx].DipoleConfiguration(m_model->materials[idx].name, Sigma_a, Sigma_s, m_model->materials[idx].eta, 
 				m_model, m_bvh, m_PrimList);
+
+			m_Volume[SSSidx].VolumeInit(m_model->materials[idx].name, Sigma_a, Sigma_s, m_model->materials[idx].eta, 
+				m_model, m_bvh, m_PrimList);
 			//m_Dipole[SSSidx].PrintDipoleInfo();
 			SSSidx++;
 		}
 	}
 	//  Construct SSS Material
-	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum, m_Dipole);
+	m_Direct = new DirectIllumination(_model, _bvh, _PrimList, _l, _al, _camera, _Width, _Height, m_DirectSampleNum, m_Dipole, m_Volume);
 	
 }
 

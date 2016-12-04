@@ -251,7 +251,7 @@ void Primitive::GetKdKsNsEtaEmission(float u, float v, Vector &Kd, Vector &Ks, V
 	}
 }
 
-void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Emission, float &Ns, float &Eta, 
+void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Kb, bool &hasBump, Vector &Emission, float &Ns, float &Eta, 
 	MicroFacetType &MicroFacet, DistributionType &Distribution, float &Roughness, 
 	Vector &Sigmna_a, Vector &Sigmna_s) {
 
@@ -278,6 +278,18 @@ void Primitive::GetMaterial(float u, float v, Vector &Kd, Vector &Ks, Vector &Em
 		Sigmna_s = Vector(mtl.sigma_s[0], mtl.sigma_s[1], mtl.sigma_s[2]);
 		Ns = mtl.shininess;
 		Eta = mtl.eta;
+	}
+
+	if(mtl.bump_map[0] != '\0') {
+		int width = mtl.width;
+		int height = mtl.height;
+		
+		int index = Clamp(int(v * height + 0.5), 0, height - 1) * width + Clamp(int(u * width + 0.5), 0, width - 1);
+		Vector bumpTex(mtl.bumpData[index * 3] / 255.f, mtl.bumpData[index * 3 + 1] / 255.f, mtl.bumpData[index * 3 + 2] / 255.f);
+		Kb = Vector(bumpTex.x * 2.0f - 1.0f, bumpTex.y * 2.0f - 1.0f, bumpTex.z * 2.0f - 1.0f);
+		//Kb = Vector(bumpTex.x, bumpTex.y, bumpTex.z);
+		hasBump = true;
+		//printf("HasBump\n");
 	}
 
 	MicroFacet = mtl.Micro;

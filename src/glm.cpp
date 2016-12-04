@@ -357,11 +357,16 @@ _glmReadMTL(GLMmodel* model, char* name)
     model->materials[i].emissive[1] = 0.0f;
     model->materials[i].emissive[2] = 0.0f;
     model->materials[i].emissive[3] = 1.0f;
+    model->materials[i].bump[0] = 0.0f;
+    model->materials[i].bump[1] = 0.0f;
+    model->materials[i].bump[2] = 0.0f;
+    model->materials[i].bump[3] = 1.0f;
 
     model->materials[i].ambient_map[0] = '\0';
     model->materials[i].diffuse_map[0] = '\0';
     model->materials[i].specular_map[0] = '\0';
     model->materials[i].dissolve_map[0] = '\0';
+    model->materials[i].bump_map[0] = '\0';
 
     model->materials[i].ambient_map_scaling[0] = 0;
     model->materials[i].ambient_map_scaling[1] = 0;
@@ -371,8 +376,11 @@ _glmReadMTL(GLMmodel* model, char* name)
     model->materials[i].specular_map_scaling[1] = 0;
     model->materials[i].dissolve_map_scaling[0] = 0;
     model->materials[i].dissolve_map_scaling[1] = 0;
+    model->materials[i].bump_map_scaling[0] = 0;
+    model->materials[i].bump_map_scaling[1] = 0;
     
     model->materials[i].texelData = NULL;
+    model->materials[i].bumpData = NULL;
     model->materials[i].width = 0;
     model->materials[i].height = 0;
     model->materials[i].mode = 0;
@@ -485,7 +493,11 @@ _glmReadMTL(GLMmodel* model, char* name)
           } else if (strcmp(buf,"map_D")==0) {
             map_name = model->materials[nummaterials].dissolve_map;
             scaling = model->materials[nummaterials].dissolve_map_scaling;
-          } else {
+          } else if (strcmp(buf,"map_Kb")==0) {
+            map_name = model->materials[nummaterials].bump_map;
+            scaling = model->materials[nummaterials].bump_map_scaling;
+          } 
+          else {
             // We don't know what kind of map it is, so ignore it
             fprintf(stderr, "Unknown map: \"%s\" found at %s(%d)\n", buf,
                 __FILE__, __LINE__);
@@ -528,6 +540,12 @@ _glmReadMTL(GLMmodel* model, char* name)
                 &model->materials[nummaterials].ambient[0],
                 &model->materials[nummaterials].ambient[1],
                 &model->materials[nummaterials].ambient[2]);
+            break;
+          case 'b':
+            fscanf(file, "%f %f %f",
+                &model->materials[nummaterials].bump[0],
+                &model->materials[nummaterials].bump[1],
+                &model->materials[nummaterials].bump[2]);
             break;
           default:
             /* eat up rest of line */
@@ -1809,13 +1827,17 @@ glmReadOBJ(const char* filename)
 
   // Read textures
   for (int i = 1; i < model->nummaterials; i++) {
-	  if(model->materials[i].diffuse_map[0] == '\0') {
+    if(model->materials[i].bump_map[0] != '\0') {
+	   model->materials[i].bumpData = ReadPPM(model->materials[i].bump_map, &model->materials[i].mode, &model->materials[i].width, &model->materials[i].height, true);
+    }
+    if(model->materials[i].diffuse_map[0] == '\0') {
 		  continue;
 	  }
 	  int width;
 	  int height;
 	  int mode;
 	  model->materials[i].texelData = ReadPPM(model->materials[i].diffuse_map, &model->materials[i].mode, &model->materials[i].width, &model->materials[i].height, true);
+
   }
   
   /* close the file */

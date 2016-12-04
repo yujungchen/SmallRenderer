@@ -8,7 +8,7 @@
 DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::vector<Primitive> &_PrimList, 
 					   PointLight *_l, AreaLight *_al, Camera *_camera, 
 					   int _Width, int _Height, int _PathSample, 
-					   Dipole *_Dipole){
+					   Dipole *_Dipole, Volume *_Volume){
 	m_model = _model;
 	m_bvh = _bvh;
 	m_l = _l;
@@ -23,6 +23,7 @@ DirectIllumination::DirectIllumination(GLMmodel *_model, BVHAccel *_bvh, std::ve
 		m_useArealight = true;
 
 	m_Dipole = _Dipole;
+	m_Volume = _Volume;
 }
 
 DirectIllumination::~DirectIllumination(){
@@ -72,9 +73,12 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				glm::vec3 N = glm::vec3(0.0);
 				glm::vec3 Kd = glm::vec3(0.0);
 				glm::vec3 Ks = glm::vec3(0.0);
+				glm::vec3 Kb = glm::vec3(0.0);
+				bool hasBump = false;
 				glm::vec3 Emission = glm::vec3(0.0);
 				glm::vec3 Sigma_a = glm::vec3(0.0);
 				glm::vec3 Sigma_s = glm::vec3(0.0);
+
 				
 				float Ns = 0.0f;
 				float Eta = 0.0f;
@@ -93,9 +97,9 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 				//m_bvh->InterpolateGeoV2(EyeRay, insect, Pos, N, Kd, Ks, Emission, Ns, Eta, m_PrimList);
 				char *MatName;
 				bool isVol = false;
-				m_bvh->IsectGeometry(EyeRay, insect, Pos, N, Kd, Ks, Emission, MicroFacet, Distribution, Roughness, 
+				m_bvh->IsectGeometry(EyeRay, insect, Pos, N, Kd, Ks, Kb, hasBump, Emission, MicroFacet, Distribution, Roughness, 
 					Ns, Eta, m_PrimList, Sigma_a, Sigma_s);
-				
+
 				// If hit light source, directly return color
 				if(isLight(Emission)){
 					Contribution = Kd;
@@ -142,8 +146,16 @@ void DirectIllumination::Render(glm::vec3 *m_Img, int SampleNumber){
 					continue;
 				
 				if(isVol){
+					//glm::vec3 vConnect = glm::normalize(Pos - l_Pos);
+					//float Cos0 = glm::dot(N, vConnect);
+					//float Cos1 = glm::dot(l_N, vConnect);
+					//float CosTerm = fabs(Cos0 * Cos1);
+
 					glm::vec3 DL_Radiance = ComputeG(Pos, l_Pos, N, l_N) * l_emission;
-					glm::vec3 ScatteringFactor = m_Dipole->ComputeRadiance(l_Pos, l_N, Pos, N, m_camera->m_CameraPos, Kd);
+					glm::vec3 ScatteringFactor = m_Dipole[0].ComputeRadiance(l_Pos, l_N, Pos, N, m_camera->m_CameraPos, Kd);
+
+					glm::vec3 Temp = m_Volume[0].VolumeTracing(Pos, N, m_camera->m_CameraPos);
+
 					Contribution = ScatteringFactor * DL_Radiance;
 				}
 				else{
