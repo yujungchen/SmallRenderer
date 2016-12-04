@@ -38,6 +38,12 @@ DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 _DEPS = microfacet.h
 DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 
+_DEPS = dipole.h
+DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
+
+_DEPS = volume.h
+DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
+
 _DEPS = direct.h
 DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 
@@ -50,7 +56,7 @@ DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 _DEPS = mcRenderer.h
 DEPS = $(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 
-_OBJ = main.o mcRenderer.o imgPPM.o glm.o configure.o core.o utility.o bvh.o light.o sampler.o camera.o radiometry.o microfacet.o direct.o path.o
+_OBJ = main.o mcRenderer.o imgPPM.o glm.o configure.o core.o utility.o bvh.o light.o sampler.o camera.o radiometry.o volume.o dipole.o microfacet.o direct.o path.o
 OBJ = $(patsubst %,$(OBJECT_DIR)/%,$(_OBJ))
 
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(DEPS)
