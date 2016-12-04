@@ -19,6 +19,17 @@ glm::vec2 UniformDiskSampling(){
 	return UnitSample;
 }
 
+glm::vec3 SphereSampler(){
+
+	float theta = 2 * M_PI * RandomNumber();
+	float phi = acos(1 - 2 * RandomNumber());
+	float x = sin(phi) * cos(theta);
+	float y = sin(phi) * sin(theta);
+	float z = cos(phi);
+
+	return glm::vec3(x, y, z);	
+}
+
 glm::vec3 CosHemiSampler(){
 	float u1 = RandomNumber();
 	float u2 = RandomNumber();
