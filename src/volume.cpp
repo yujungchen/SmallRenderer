@@ -51,7 +51,7 @@ float Volume::MonoChrome(glm::vec3 refract, glm::vec3 pos, glm::vec3 N, float si
 	Point NextDest = v_ray.o + t * v_ray.d;
 	PhaseDir = SphereSampler();
 	
-	printf("%f %f %f %f\n", t, PhaseDir.x, PhaseDir.y, PhaseDir.z);
+	//printf("%f %f %f %f\n", t, PhaseDir.x, PhaseDir.y, PhaseDir.z);
 
 	return Channel;
 }

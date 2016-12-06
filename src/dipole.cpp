@@ -45,9 +45,9 @@ void Dipole::DipoleConfiguration(char *_Name, glm::vec3 _Sigma_a, glm::vec3 _Sig
 	m_PrimList = _PrimList;
 
 	m_SSNum = 8;
-	m_MSNum = 8;
+	m_MSNum = 32;
 
-	m_Phase = 0.8f;
+	m_Phase = 0.5f;
 	m_PhaseSqr = m_Phase * m_Phase;
 
 	m_ShiftPos = glm::vec3(0.0f);
@@ -169,7 +169,7 @@ float Dipole::ComputeSSFactor(glm::vec3 &l_pos, glm::vec3 &l_N, glm::vec3 &pos, 
 	float G = fabs(glm::dot(ni, To)) / LdotNi;
 	float Sigma_tc = Sigma_t + G * Sigma_t;
 
-	SS = Ft * Fti * Phase * Sigma_s * exp(-1.0f * si_prime * Sigma_t) / (Sigma_tc * Sigma_t);
+	SS = Ft * Fti * Phase * Sigma_s * exp(-1.0f * si_prime * Sigma_t) / (Sigma_tc);
 
 	delete March_insect;
 	return SS;
@@ -274,9 +274,8 @@ float Dipole::ComputeRd(glm::vec3 &l_pos, glm::vec3 &l_N, glm::vec3 &pos, glm::v
 
 	Rd = (Sigma_tr_dr + 1.0f) * exp(-1.0f * Sigma_tr_dr) * zr / (dr * dr * dr) +
 	     (Sigma_tr_dv + 1.0f) * exp(-1.0f * Sigma_tr_dv) * zv / (dv * dv * dv);
-	Rd = Rd / Sigma_t;
 
-	Rd = INV_PI * 0.25f * Rd / (Sigma_tr * Sigma_tr * Sigma_tr * exp(-1.0f * Sigma_tr * r));
+	Rd = INV_PI * 0.25f * Rd / (Sigma_tr * exp(-1.0f * Sigma_tr * r));
 	
 	glm::vec3 toL = glm::normalize(l_pos - Pi);
 	float LdotNi = fabs(glm::dot(toL, ni));
@@ -285,7 +284,7 @@ float Dipole::ComputeRd(glm::vec3 &l_pos, glm::vec3 &l_N, glm::vec3 &pos, glm::v
 	float Ft = 1.0f - EvalDieletric(fabs(glm::dot(w_in, N)), 1.0f, m_N);
 	float Fti = 1.0f - EvalDieletric(LdotNi, 1.0f, m_N);
 
-	Rd = INV_PI * Rd * Ft * Fti;
+	//Rd = Rd * Ft * Fti * INV_PI * 3.0f;
 
 	delete Sample_isect;
 	return Rd;
@@ -307,7 +306,7 @@ glm::vec3 Dipole::ComputeMultipleScatter(glm::vec3 &l_pos, glm::vec3 &l_N, glm::
 		G = ComputeRd(l_pos, l_N, pos, N, prev_pos, m_Sigma_s.y, m_Sigma_t.y, m_Sigma_tr.y, isValid, U, V, m_zr.y, m_zv.y);
 		B = ComputeRd(l_pos, l_N, pos, N, prev_pos, m_Sigma_s.z, m_Sigma_t.z, m_Sigma_tr.z, isValid, U, V, m_zr.z, m_zv.z);
 		
-		MultipleScatter = MultipleScatter + glm::vec3(R, G, B) * m_Aplha_Prime;
+		MultipleScatter = MultipleScatter + glm::vec3(R, G, B);
 	}
 	MultipleScatter = MultipleScatter / (float)m_MSNum;
 
@@ -333,13 +332,13 @@ glm::vec3 Dipole::ComputeRadiance(glm::vec3 &l_pos, glm::vec3 &l_N, glm::vec3 &p
 	glm::vec3 SS = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 MS = glm::vec3(0.0f, 0.0f, 0.0f);
 	
-	SS = ComputeSingleScatter(l_pos, l_N, pos, N, prev_pos);
+	//SS = ComputeSingleScatter(l_pos, l_N, pos, N, prev_pos);
 	MS = ComputeMultipleScatter(l_pos, l_N, pos, N, prev_pos);
 	//glm::vec3 V = glm::normalize(prev_pos - pos);
 	//glm::vec3 L = glm::normalize(l_pos - pos);
 	//glm::vec3 H = glm::normalize(V + L);
 
-	Radiance = MS * 300000.0f + SS * 3000.0f;// + Schlick(V, H);
+	Radiance = MS;//SS * 3.0f;// + SS * 1000.0f;// + Schlick(V, H);
 	Radiance = Radiance * Kd;
 	return Radiance;
 }
